@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nexus Sport - Dashboard</title>
-  <link rel="stylesheet" href="../static/css/styles.css" />
+  <link rel="stylesheet" href="static/css/styles.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
 </head>
 <body data-page="dashboard">
@@ -15,8 +15,8 @@
     <div class="container topbar-row">
       <!-- Brand-->
       <a class="brand" href="dashboard.html" aria-label="Ir a Dashboard">
-        <img class="brand-logo brand-logo--desktop" src="../static/images/logo-desktop.png" alt="Turnero Club" />
-        <img class="brand-logo brand-logo--mobile" src="../static/images/isologo-mobile.png" alt="TC" />
+        <img class="brand-logo brand-logo--desktop" src="static/images/logo-desktop.png" alt="Turnero Club" />
+        <img class="brand-logo brand-logo--mobile" src="static/images/isologo-mobile.png" alt="TC" />
       </a>
 
       <!-- Right actions -->
@@ -141,7 +141,7 @@
     <p class="muted-dark">¿Querés darte de baja de este turno?</p>
     <div class="modal-actions">
       <button class="btn" id="modalCancel">Cancelar</button>
-      <button class="btn btn-warn btn-cancel" data-cancel="${escAttr(x.r.id)}" aria-label="Darme de baja">
+      <button class="btn btn-warn btn-cancel" id="modalConfirm" type="button" aria-label="Darme de baja">
         <i class="mdi mdi-trash-can-outline" aria-hidden="true"></i>
         <span class="btn-label">Darme de baja</span>
       </button>
@@ -150,7 +150,7 @@
 </div>
 
 <div class="toasts" id="toasts"></div>
-<script src="../static/js/app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="static/js/app.js"></script>
 </body>
 </html>

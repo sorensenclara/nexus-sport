@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nexus Sport - Login</title>
+
+  <link rel="stylesheet" href="static/css/styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+</head>
+
+<body data-page="login">
+
+<header class="topbar" id="appHeader">
+  <div class="topbar-inner">
+    <div class="container topbar-row">
+      <a class="brand" href="dashboard.html" aria-label="Ir a Dashboard">
+        <img class="brand-logo brand-logo--desktop" src="static/images/logo-desktop.png" alt="Turnero Club" />
+        <img class="brand-logo brand-logo--mobile" src="static/images/isologo-mobile.png" alt="TC" />
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="auth-card">
+    <h1>Ingresar</h1>
+
+    <label class="field">
+      <span>Usuario</span>
+      <input id="loginUser" type="text" placeholder="ej: maria" autocomplete="username">
+    </label>
+
+    <label class="field">
+      <span>Clave</span>
+      <input id="loginPass" type="password" placeholder="cualquiera" autocomplete="current-password">
+    </label>
+
+    <button class="btn-primary" id="btnLogin" style="margin-top: 16px;">Entrar</button>
+
+    <div class="hint">
+      Ante cualquier inconveniente contactar 
+      <b>info@nexus.com.ar</b> o 
+      <b>+549 2494 505050</b>.
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+</main>
+
+<script src="static/js/app.js"></script>
+
+</body>
+</html>

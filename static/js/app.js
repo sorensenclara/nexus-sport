@@ -1,16 +1,11 @@
 /* =========================================================
    Turnero NEXUS SPORT multi-página (HTML/CSS/JS)
+   Versión estática (Lo arme para GitHub Pages / hosting estático)
    ========================================================= */
 
-/* ---------- Base path helpers (para templates/ + static/) ---------- */
-function inTemplatesFolder() {
-  return window.location.pathname.includes("/templates/");
-}
-function pageUrl(name) {
-  return inTemplatesFolder() ? name : `templates/${name}`;
-}
+/* ---------- Navegación (HTML en raíz) ---------- */
 function goPage(name) {
-  window.location.href = pageUrl(name);
+  window.location.href = name;
 }
 
 /* ---------- Storage keys ---------- */
@@ -40,7 +35,6 @@ function seedIfEmpty() {
   if (existing && Array.isArray(existing) && existing.length) return;
 
   const today = startOfDay(new Date());
-
   const sessions = [];
   const activities = [
     { a: "Padel", i: ["Profe Juan", "Profe Nico"], l: ["Cancha 1", "Cancha 2"], cap: 8 },
@@ -91,7 +85,7 @@ function paidActivitiesForUser(_username) {
 function requireSessionOrRedirect() {
   const user = loadJSON(LS.session, null);
   if (!user) {
-    goPage("login.html");
+    goPage("index.html");
     return false;
   }
   state.user = user;
@@ -135,10 +129,8 @@ function fmtTime(d) {
   // 06:00 P / 09:30 A
   const hours = d.getHours();
   const minutes = d.getMinutes().toString().padStart(2, "0");
-
   const isPM = hours >= 12;
   const hour12 = hours % 12 === 0 ? 12 : hours % 12;
-
   return `${hour12.toString().padStart(2, "0")}:${minutes} ${isPM ? "P" : "A"}`;
 }
 
@@ -190,7 +182,7 @@ function renderFilters() {
 
   actSel?.addEventListener("change", () => {
     state.filters.activity = actSel.value;
-    renderActivityLegend(); // ✅ clave
+    renderActivityLegend();
     renderCalendar();
     renderDaySlots();
   });
@@ -207,7 +199,7 @@ function renderFilters() {
     renderDaySlots();
   });
 
-  renderActivityLegend(); // ✅ pinta la barra tipo Lexa al cargar
+  renderActivityLegend();
 }
 
 /* =======================
@@ -252,7 +244,6 @@ function renderActivityLegend() {
     el.addEventListener("click", () => {
       state.filters.activity = (state.filters.activity === a) ? "ALL" : a;
       actSel.value = state.filters.activity;
-
       renderActivityLegend();
       renderCalendar();
       renderDaySlots();
@@ -494,7 +485,7 @@ function renderCalendar() {
 }
 
 /* =======================
-   Panel derecho + chips de actividades (mobile friendly)
+   Panel derecho + chips de actividades
    ======================= */
 function renderDayActivityChips(slots) {
   const host = $("#dayActivityChips");
@@ -571,7 +562,6 @@ function renderDaySlots() {
 
 /* =======================
    Booking
-   FIX: guarda reserva + se verá en Mis turnos/Dashboard
    ======================= */
 async function bookSlot(slotId, btnEl) {
   btnEl.disabled = true;
@@ -596,7 +586,6 @@ async function bookSlot(slotId, btnEl) {
     return;
   }
 
-  // evita duplicado por seguridad
   const myIds = getMySlotIds();
   if (myIds.has(slotId)) {
     toast("bad", "Ya estás anotado/a", "Este turno ya está en tus turnos.");
@@ -617,7 +606,11 @@ async function bookSlot(slotId, btnEl) {
   slot.booked += 1;
   saveJSON(LS.sessions, sessions);
 
-  showAlert("ok", "Listo", `Quedaste anotado/a en ${slot.activity} · ${fmtDateShort(new Date(slot.startISO))} ${fmtTime(new Date(slot.startISO))}`);
+  showAlert(
+    "ok",
+    "Listo",
+    `Quedaste anotado/a en ${slot.activity} · ${fmtDateShort(new Date(slot.startISO))} ${fmtTime(new Date(slot.startISO))}`
+  );
 
   btnEl.disabled = false;
   btnEl.textContent = "Anotarme";
@@ -646,7 +639,6 @@ function toast(kind, title, msg) {
 }
 
 function showAlert(kind, title, msg) {
-  // si SweetAlert2 no está cargado, fallback a toast
   if (typeof Swal === "undefined") {
     toast(kind === "ok" ? "ok" : "bad", title, msg);
     return;
@@ -673,7 +665,6 @@ function showAlert(kind, title, msg) {
 /* =======================
    Mis turnos + Dashboard
    ======================= */
-
 function myBookedItemsSorted() {
   const sessions = getClubSessions();
   const my = getMyReservations();
@@ -681,12 +672,11 @@ function myBookedItemsSorted() {
   return my
     .map(r => ({ r, slot: sessions.find(s => s.id === r.slotId) }))
     .filter(x => x.slot)
-    .sort((a,b)=> new Date(a.slot.startISO) - new Date(b.slot.startISO));
+    .sort((a, b) => new Date(a.slot.startISO) - new Date(b.slot.startISO));
 }
 
 async function cancelReservation(resId) {
-  
-    const primary = getComputedStyle(document.documentElement)
+  const primary = getComputedStyle(document.documentElement)
     .getPropertyValue("--primary")
     .trim() || "#3e7699";
 
@@ -694,25 +684,30 @@ async function cancelReservation(resId) {
     .getPropertyValue("--secondary")
     .trim() || "#94a3b8";
 
-  const result = await Swal.fire({
-    title: "Confirmar baja",
-    text: "¿Querés darte de baja de este turno?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Darme de baja",
-    cancelButtonText: "Mantener la clase",
-    confirmButtonColor: primary,
-    cancelButtonColor: secondary,
-    reverseButtons: true,
-    iconColor: "#da653c",
-    customClass: {
-      confirmButton: "swal-btn-primary",
-      cancelButton: "swal-btn-secondary"
-    },
-    buttonsStyling: false
-  });
-
-  if (!result.isConfirmed) return;
+  // Si SweetAlert2 no está, fallback
+  if (typeof Swal === "undefined") {
+    const ok = window.confirm("¿Querés darte de baja de este turno?");
+    if (!ok) return;
+  } else {
+    const result = await Swal.fire({
+      title: "Confirmar baja",
+      text: "¿Querés darte de baja de este turno?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Darme de baja",
+      cancelButtonText: "Mantener la clase",
+      confirmButtonColor: primary,
+      cancelButtonColor: secondary,
+      reverseButtons: true,
+      iconColor: "#da653c",
+      customClass: {
+        confirmButton: "swal-btn-primary",
+        cancelButton: "swal-btn-secondary"
+      },
+      buttonsStyling: false
+    });
+    if (!result.isConfirmed) return;
+  }
 
   const all = getReservations();
   const idx = all.findIndex(r => r.id === resId && r.username === state.user.username);
@@ -728,16 +723,20 @@ async function cancelReservation(resId) {
     saveJSON(LS.sessions, sessions);
   }
 
-  Swal.fire({
-    toast: true,
-    position: "top-end",
-    icon: "success",
-    title: "Te diste de baja correctamente",
-    showConfirmButton: false,
-    timer: 1800,
-    timerProgressBar: true,
-    iconColor: primary
-  });
+  if (typeof Swal === "undefined") {
+    toast("ok", "Listo", "Te diste de baja correctamente");
+  } else {
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: "Te diste de baja correctamente",
+      showConfirmButton: false,
+      timer: 1800,
+      timerProgressBar: true,
+      iconColor: primary
+    });
+  }
 }
 
 function renderMisTurnos() {
@@ -771,16 +770,18 @@ function renderMisTurnos() {
           <div class="turn-meta">${esc(x.slot.instructor)} · ${esc(x.slot.location)}</div>
         </div>
         <div class="turn-actions">
-          <button class="btn btn-warn btn-cancel" data-cancel="${escAttr(x.r.id)}"><i class="mdi mdi-trash-can-outline" aria-hidden="true"></i>
-        <span class="btn-label">Darme de baja</span></button>
+          <button class="btn btn-warn btn-cancel" data-cancel="${escAttr(x.r.id)}">
+            <i class="mdi mdi-trash-can-outline" aria-hidden="true"></i>
+            <span class="btn-label">Darme de baja</span>
+          </button>
         </div>
       </div>
     `;
   }).join("");
 
-  host.querySelectorAll("button[data-cancel]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      cancelReservation(btn.getAttribute("data-cancel"));
+  host.querySelectorAll("button[data-cancel]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      await cancelReservation(btn.getAttribute("data-cancel"));
       renderMisTurnos();
       renderDashboard();
     });
@@ -788,20 +789,17 @@ function renderMisTurnos() {
 }
 
 function renderDashboard() {
-  // Próximo turno (si existe)
   const nextHost =
     $("#nextTurn") ||
     $("#nextTurnCard") ||
     $("#nextTurnBox");
 
-  // Lista/tabla de mis turnos
   const tbody =
     $("#myTurnsTbody") ||
     $("#dashboardTableBody") ||
     $("#dashboardTurnsBody");
 
-  const listHost =
-    $("#dashboardTurnsList");
+  const listHost = $("#dashboardTurnsList");
 
   const empty =
     $("#dashboardEmpty") ||
@@ -827,6 +825,7 @@ function renderDashboard() {
   // Tabla
   if (tbody) {
     tbody.innerHTML = "";
+
     if (!items.length) {
       if (empty) empty.style.display = "";
       return;
@@ -858,8 +857,8 @@ function renderDashboard() {
     });
 
     tbody.querySelectorAll("button[data-cancel]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        cancelReservation(btn.getAttribute("data-cancel"));
+      btn.addEventListener("click", async () => {
+        await cancelReservation(btn.getAttribute("data-cancel"));
         renderDashboard();
         renderMisTurnos();
       });
@@ -900,8 +899,8 @@ function renderDashboard() {
     }).join("");
 
     listHost.querySelectorAll("button[data-cancel]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        cancelReservation(btn.getAttribute("data-cancel"));
+      btn.addEventListener("click", async () => {
+        await cancelReservation(btn.getAttribute("data-cancel"));
         renderDashboard();
         renderMisTurnos();
       });
@@ -910,7 +909,7 @@ function renderDashboard() {
 }
 
 /* =======================
-   Reservar
+   Reservar: navegación
    ======================= */
 function bindReservarNav() {
   $("#btnPrev")?.addEventListener("click", () => {
@@ -941,7 +940,7 @@ function bindReservarNav() {
 
   $("#btnLogout")?.addEventListener("click", () => {
     localStorage.removeItem(LS.session);
-    goPage("login.html");
+    goPage("index.html");
   });
 
   const page = document.body.getAttribute("data-page");
@@ -1017,23 +1016,19 @@ function init() {
     return;
   }
 
-  
-
-  // NUEVO: si estás en mis-turnos
   if (page === "mis-turnos") {
     $("#btnLogout")?.addEventListener("click", () => {
       localStorage.removeItem(LS.session);
-      goPage("login.html");
+      goPage("index.html");
     });
     renderMisTurnos();
     return;
   }
 
-  // NUEVO: si estás en dashboard
   if (page === "dashboard") {
     $("#btnLogout")?.addEventListener("click", () => {
       localStorage.removeItem(LS.session);
-      goPage("login.html");
+      goPage("index.html");
     });
     renderDashboard();
     return;
@@ -1041,7 +1036,7 @@ function init() {
 
   $("#btnLogout")?.addEventListener("click", () => {
     localStorage.removeItem(LS.session);
-    goPage("login.html");
+    goPage("index.html");
   });
 }
 
@@ -1106,52 +1101,51 @@ function addMonths(d, n) {
   return x;
 }
 
-/* =========================================================
-   Header
-   ========================================================= */
-(function initHeaderLexa(){
+/* =======================
+   Header (menú mobile + logout)
+   ======================= */
+(function initHeaderLexa() {
   const btn = document.getElementById("btnMenuToggle");
   const menu = document.getElementById("mobileMenu");
   const logoutTop = document.getElementById("btnLogoutTop");
   const logoutMobile = document.getElementById("btnLogoutMobile");
 
-  function openMenu(){
-    if(!menu) return;
+  function openMenu() {
+    if (!menu) return;
     menu.hidden = false;
-    btn?.setAttribute("aria-expanded","true");
+    btn?.setAttribute("aria-expanded", "true");
     document.body.style.overflow = "hidden";
   }
-  function closeMenu(){
-    if(!menu) return;
+  function closeMenu() {
+    if (!menu) return;
     menu.hidden = true;
-    btn?.setAttribute("aria-expanded","false");
+    btn?.setAttribute("aria-expanded", "false");
     document.body.style.overflow = "";
   }
 
   btn?.addEventListener("click", () => {
-    if(menu?.hidden) openMenu();
+    if (menu?.hidden) openMenu();
     else closeMenu();
   });
 
   menu?.addEventListener("click", (e) => {
-    if(e.target === menu) closeMenu();
+    if (e.target === menu) closeMenu();
   });
 
   document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape" && menu && !menu.hidden) closeMenu();
+    if (e.key === "Escape" && menu && !menu.hidden) closeMenu();
   });
 
-  // Logout
-  function doLogout(){
+  function doLogout() {
     localStorage.removeItem(LS.session);
-    goPage("login.html");
+    goPage("index.html");
   }
   logoutTop?.addEventListener("click", doLogout);
   logoutMobile?.addEventListener("click", doLogout);
 
   const route = (document.body.dataset.route || "").trim();
-  document.querySelectorAll("[data-route]").forEach(a=>{
-    if(route && a.getAttribute("data-route") === route) a.classList.add("is-active");
+  document.querySelectorAll("[data-route]").forEach(a => {
+    if (route && a.getAttribute("data-route") === route) a.classList.add("is-active");
   });
 })();
 
