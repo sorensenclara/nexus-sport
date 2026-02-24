@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nexus Sport - Dashboard</title>
+  <link rel="stylesheet" href="../static/css/styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+</head>
+<body data-page="dashboard">
+
+<header class="topbar" id="appHeader">
+  <!-- TOPBAR (AZUL) -->
+  <div class="topbar-inner">
+    <div class="container topbar-row">
+      <!-- Brand-->
+      <a class="brand" href="dashboard.html" aria-label="Ir a Dashboard">
+        <img class="brand-logo brand-logo--desktop" src="../static/images/logo-desktop.png" alt="Turnero Club" />
+        <img class="brand-logo brand-logo--mobile" src="../static/images/isologo-mobile.png" alt="TC" />
+      </a>
+
+      <!-- Right actions -->
+      <div class="topbar-actions">
+        <!-- Logout (desktop) -->
+        <button class="Btn-logout" id="btnLogoutTop" aria-label="Cerrar sesión">
+          <div class="sign">
+            <svg viewBox="0 0 512 512">
+              <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
+             </svg>
+          </div>
+          
+          <div class="text">Cerrar Sesión</div>
+        </button>
+
+        <!-- Avatar -->
+        <div class="avatar" id="avatarText" title="Usuario">US</div>
+
+        <!-- Burger (mobile) -->
+        <button class="icon-btn menu-toggle" id="btnMenuToggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16v2H4V7zm0 6h16v2H4v-2zm0 6h16v2H4v-2z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE TITLE -->
+  <section class="page-title">
+    <div class="container page-title-inner">
+      <div class="page-title-left">
+        <h1 id="pageTitle" class="pageTitle">Dashboard</h1>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBNAV-->
+  <nav class="subnav" aria-label="Navegación">
+    <div class="container">
+      <div class="subnav-float" id="subnavInner">
+        <a href="dashboard.html" data-route="dashboard" class="subnav-link is-active">
+          <i class="mdi mdi-view-dashboard-outline" aria-hidden="true"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="reservar.html" data-route="reservar" class="subnav-link">
+          <i class="mdi mdi-calendar-check" aria-hidden="true"></i>
+          <span>Reservar</span>
+        </a>
+
+        <a href="mis-turnos.html" data-route="mis-turnos" class="subnav-link">
+          <i class="mdi mdi-clipboard-list-outline" aria-hidden="true"></i>
+          <span>Mis turnos</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MOBILE MENU (dropdown) -->
+  <div class="mobile-menu" id="mobileMenu" hidden>
+    <div class="mobile-menu-card">
+      <a href="dashboard.html" data-route="dashboard" class="mm-link">Dashboard</a>
+      <a href="reservar.html" data-route="reservar" class="mm-link">Reservar</a>
+      <a href="mis-turnos.html" data-route="mis-turnos" class="mm-link">Mis turnos</a>
+
+      <div class="mm-sep"></div>
+
+      <button class="mm-logout" id="btnLogoutMobile" type="button">Cerrar sesión</button>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="container">
+
+    <!-- Cards principales -->
+    <div class="grid-2">
+      <section class="card">
+        <h3>Próximos turnos</h3>
+        <div id="nextTurn" class="empty muted-dark">No tenés turnos todavía.</div>
+      </section>
+
+      <section class="card">
+        <h3>Reservar turnos</h3>
+        <p class="muted-dark">Entrá al calendario y anotate con 1 clic en el horario disponible.</p>
+        <div class="actions" style="margin-top:10px">
+          <a class="btn-primary" href="reservar.html"> 
+                <span class="circle1"></span>
+                <span class="circle2"></span>
+                <span class="circle3"></span>
+                <span class="circle4"></span>
+                <span class="circle5"></span>
+            Ir a Reservar</a>
+          <a class="btn-secondary" href="mis-turnos.html">Ver Mis turnos</a>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tabla abajo -->
+    <section class="card">
+      <h3>Mis turnos</h3>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Actividad</th><th>Día</th><th>Hora</th><th>Profesor</th><th>Lugar</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="dashboardTableBody"></tbody>
+        </table>
+      </div>
+      <div id="dashboardEmpty" class="empty muted-dark" style="display:none;">Todavía no tenés turnos reservados.</div>
+    </section>
+
+  </div>
+</main>
+
+<!-- Modal + Toasts -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3>Confirmar baja</h3>
+    <p class="muted-dark">¿Querés darte de baja de este turno?</p>
+    <div class="modal-actions">
+      <button class="btn" id="modalCancel">Cancelar</button>
+      <button class="btn btn-warn btn-cancel" data-cancel="${escAttr(x.r.id)}" aria-label="Darme de baja">
+        <i class="mdi mdi-trash-can-outline" aria-hidden="true"></i>
+        <span class="btn-label">Darme de baja</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<script src="../static/js/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>
