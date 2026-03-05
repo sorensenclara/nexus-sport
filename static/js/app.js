@@ -678,7 +678,7 @@ function myBookedItemsSorted() {
 async function cancelReservation(resId) {
   const primary = getComputedStyle(document.documentElement)
     .getPropertyValue("--primary")
-    .trim() || "#3e7699";
+    .trim() || "#22769B";
 
   const secondary = getComputedStyle(document.documentElement)
     .getPropertyValue("--secondary")
@@ -699,7 +699,7 @@ async function cancelReservation(resId) {
       confirmButtonColor: primary,
       cancelButtonColor: secondary,
       reverseButtons: true,
-      iconColor: "#da653c",
+      iconColor: "#EC5B29",
       customClass: {
         confirmButton: "swal-btn-primary",
         cancelButton: "swal-btn-secondary"

@@ -3,13 +3,13 @@
    ========================================================= */
 
 :root{
-  --primary:#3e7699;
-  --secondary:#9eca75;
+  --primary:#22769B;
+  --secondary:#9CD875;
   --accent:#99415c;
-  --warn:#da653c;
+  --warn:#EC5B29;
 
   --dark:#22415e;
-  --dark-2:#25779c;  
+  --dark-2:#22769B;  
   --text:#1d1d1d;
   --muted:rgba(0,0,0,.62);
 
@@ -18,7 +18,7 @@
   --panel-2:#f7f8fb;
 
   --tc-topbar: #22415e;    
-  --tc-subnav: #9eca75;    
+  --tc-subnav: #9CD875;    
   --tc-text: #0f172a;
   --tc-muted: rgba(15,23,42,.68);
   --tc-border: rgba(15,23,42,.10);
@@ -34,7 +34,7 @@
 html,body{height:100%}
 body{
   margin: 0;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Roboto', sans-serif;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -132,7 +132,7 @@ body{
   place-items:center;
   font-weight: 900;
   color: #0b1220;
-  background: #9eca75;
+  background: #9CD875;
   box-shadow: 0 10px 22px rgba(0,0,0,.15);
   user-select:none;
 }
@@ -827,8 +827,8 @@ body{
 }
 
 /* Colores por actividad (ajustables) */
-.tag.padel{ background: #9eca75; color:#1f2b33; }
-.tag.gym{ background: #3e7699; }
+.tag.padel{ background: #9CD875; color:#1f2b33; }
+.tag.gym{ background: #22769B; }
 .tag.pilates{ background: #4fc3f7; color:#083042; }
 .tag.crossfit{ background: #20c997; color:#083042; }
 .tag.more{ background: rgba(0,0,0,.35); }
@@ -952,8 +952,8 @@ body{
 }
 
 /* Colores por actividad (ajustáble) */
-.event-pill.padel{ background:#9eca75; color:#143140; }
-.event-pill.gym{ background:#3e7699; }
+.event-pill.padel{ background:#9CD875; color:#143140; }
+.event-pill.gym{ background:#22769B; }
 .event-pill.pilates{ background:#4fc3f7; color:#083042; }
 .event-pill.crossfit{ background:#20c997; color:#083042; }
 .event-pill.other{ background:#6c757d; }
@@ -1063,8 +1063,8 @@ body{
 }
 
 /* Colores por actividad */
-.legend-badge.padel{ background:#9eca75; }     /* verde */
-.legend-badge.gym{ background:#3e7699; }       /* azul */
+.legend-badge.padel{ background:#9CD875; }     /* verde */
+.legend-badge.gym{ background:#22769B; }       /* azul */
 .legend-badge.pilates{ background:#56cfe1; }   /* celeste */
 .legend-badge.crossfit{ background:#2bb3ad; }  /* turquesa */
 .legend-badge.other{ background:#6b7280; }     /* fallback */
@@ -1147,8 +1147,8 @@ body{
 
 /* Icon color */
 .swal2-icon.swal2-warning {
-  border-color: #da653c !important;
-  color: #da653c !important;
+  border-color: #EC5B29 !important;
+  color: #EC5B29 !important;
 }
 
 /* ocultar texto del botón confirm en mobile */
