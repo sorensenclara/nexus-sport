@@ -23,7 +23,7 @@ let state = {
   selectedDate: startOfDay(new Date()),
   weekStart: startOfWeek(new Date()),
   monthCursor: new Date(),
-  view: "WEEK", // WEEK | MONTH
+  view: "WEEK",
   filters: { activity: "ALL", instructor: "", location: "" }
 };
 
@@ -43,12 +43,10 @@ function seedIfEmpty() {
     { a: "Crossfit", i: ["Profe Vero"], l: ["Box"], cap: 16 }
   ];
 
-  // slots ~30 días
   for (let d = -7; d <= 28; d++) {
     const day = new Date(today);
     day.setDate(today.getDate() + d);
 
-    // 0..2 por día
     const count = (day.getDay() === 0) ? 0 : (day.getDay() % 3);
     for (let k = 0; k < count; k++) {
       const act = activities[(day.getDate() + k) % activities.length];
@@ -78,7 +76,6 @@ function getClubSessions() {
 }
 
 function paidActivitiesForUser(_username) {
-  // demo
   return ["Padel", "Pilates", "Gym", "Crossfit"];
 }
 
@@ -99,14 +96,17 @@ function getReservations() {
   const r = loadJSON(LS.reservations, []);
   return Array.isArray(r) ? r : [];
 }
+
 function saveReservations(list) {
   saveJSON(LS.reservations, Array.isArray(list) ? list : []);
 }
+
 function getMyReservations() {
   const all = getReservations();
   const u = state.user?.username;
   return all.filter(r => r.username === u);
 }
+
 function getMySlotIds() {
   return new Set(getMyReservations().map(r => r.slotId));
 }
@@ -122,11 +122,12 @@ function fmtDateLong(d) {
     day: "numeric"
   });
 }
+
 function fmtDateShort(d) {
   return d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" });
 }
+
 function fmtTime(d) {
-  // 06:00 P / 09:30 A
   const hours = d.getHours();
   const minutes = d.getMinutes().toString().padStart(2, "0");
   const isPM = hours >= 12;
@@ -165,6 +166,7 @@ function renderFilters() {
     }).join("");
     actSel.value = state.filters.activity;
   }
+
   if (instSel) {
     instSel.innerHTML = instructors.map(i => {
       const label = i ? i : "Todos";
@@ -172,6 +174,7 @@ function renderFilters() {
     }).join("");
     instSel.value = state.filters.instructor;
   }
+
   if (locSel) {
     locSel.innerHTML = locations.map(l => {
       const label = l ? l : "Todos";
@@ -203,7 +206,7 @@ function renderFilters() {
 }
 
 /* =======================
-   Leyenda tipo Lexa (Actividades + color)
+   Leyenda actividades
    ======================= */
 function renderActivityLegend() {
   const host = document.querySelector("#activityLegend");
@@ -341,7 +344,6 @@ function renderDowHeader() {
   dow.innerHTML = labels.map(d => `<div class="dow">${d}</div>`).join("");
 }
 
-/* --- colores por actividad (clase CSS) --- */
 function activityClass(name) {
   const k = (name || "").toLowerCase();
   if (k.includes("padel")) return "padel";
@@ -351,7 +353,6 @@ function activityClass(name) {
   return "other";
 }
 
-/* --- pills HTML dentro del mes --- */
 function monthPillsHtml(dayDate) {
   const slots = slotsForDayAll(dayDate);
   if (!slots.length) return `<div class="events"></div>`;
@@ -485,7 +486,7 @@ function renderCalendar() {
 }
 
 /* =======================
-   Panel derecho + chips de actividades
+   Panel derecho + chips
    ======================= */
 function renderDayActivityChips(slots) {
   const host = $("#dayActivityChips");
@@ -684,7 +685,6 @@ async function cancelReservation(resId) {
     .getPropertyValue("--secondary")
     .trim() || "#94a3b8";
 
-  // Si SweetAlert2 no está, fallback
   if (typeof Swal === "undefined") {
     const ok = window.confirm("¿Querés darte de baja de este turno?");
     if (!ok) return;
@@ -822,7 +822,6 @@ function renderDashboard() {
     }
   }
 
-  // Tabla
   if (tbody) {
     tbody.innerHTML = "";
 
@@ -865,7 +864,6 @@ function renderDashboard() {
     });
   }
 
-  // Lista
   if (listHost) {
     if (!items.length) {
       if (empty) empty.style.display = "";
@@ -983,12 +981,18 @@ function init() {
 
   if (page === "login") {
     $("#btnLogin")?.addEventListener("click", () => {
-      const username = ($("#loginUser")?.value || "").trim().toLowerCase();
+      const username = ($("#loginUser")?.value || "").trim();
+
       if (!username) {
         showAlert("bad", "Error", "Ingresá un usuario.");
         return;
       }
-      const user = { username, paidActivities: paidActivitiesForUser(username) };
+
+      const user = {
+        username,
+        paidActivities: paidActivitiesForUser(username)
+      };
+
       saveJSON(LS.session, user);
       toast("ok", "Bienvenido/a", `Actividades abonadas: ${user.paidActivities.join(", ")}`);
       goPage("dashboard.html");
@@ -998,12 +1002,18 @@ function init() {
 
   if (!requireSessionOrRedirect()) return;
 
+  /* esto hace que el nombre/avatar se cargue en TODAS las páginas */
+  bindProfileData();
+
   if (page === "reservar") {
     state.selectedDate = startOfDay(new Date());
     state.weekStart = startOfWeek(state.selectedDate);
-    state.monthCursor = new Date(state.selectedDate.getFullYear(), state.selectedDate.getMonth(), 1);
+    state.monthCursor = new Date(
+      state.selectedDate.getFullYear(),
+      state.selectedDate.getMonth(),
+      1
+    );
 
-    // Default: desktop=MONTH, mobile=WEEK
     const isMobile = window.matchMedia("(max-width: 820px)").matches;
     state.view = isMobile ? "WEEK" : "MONTH";
 
@@ -1017,27 +1027,39 @@ function init() {
   }
 
   if (page === "mis-turnos") {
-    $("#btnLogout")?.addEventListener("click", () => {
-      localStorage.removeItem(LS.session);
-      goPage("index.html");
-    });
     renderMisTurnos();
     return;
   }
 
   if (page === "dashboard") {
-    $("#btnLogout")?.addEventListener("click", () => {
-      localStorage.removeItem(LS.session);
-      goPage("index.html");
-    });
     renderDashboard();
     return;
   }
 
-  $("#btnLogout")?.addEventListener("click", () => {
-    localStorage.removeItem(LS.session);
-    goPage("index.html");
-  });
+  if (page === "perfil") {
+    renderProfilePaidClasses();
+    return;
+  }
+}
+
+function renderProfilePaidClasses() {
+  const host = document.getElementById("profilePaidClasses");
+  if (!host || !state.user) return;
+
+  const acts = state.user.paidActivities || [];
+
+  if (!acts.length) {
+    host.innerHTML = `<tr><td colspan="3">No tenés clases abonadas</td></tr>`;
+    return;
+  }
+
+  host.innerHTML = acts.map(a => `
+    <tr>
+      <td>${esc(a)}</td>
+      <td>Según disponibilidad</td>
+      <td>—</td>
+    </tr>
+  `).join("");
 }
 
 /* =======================
@@ -1045,12 +1067,14 @@ function init() {
    ======================= */
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function unique(arr) { return Array.from(new Set(arr)); }
+
 function cryptoId() {
   try {
     if (crypto && crypto.randomUUID) return crypto.randomUUID();
   } catch (_) {}
   return "id_" + Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
+
 function esc(s) {
   return String(s ?? "")
     .replaceAll("&", "&amp;")
@@ -1059,7 +1083,10 @@ function esc(s) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-function escAttr(s) { return esc(s).replaceAll("`", ""); }
+
+function escAttr(s) {
+  return esc(s).replaceAll("`", "");
+}
 
 function loadJSON(key, fallback) {
   try {
@@ -1070,6 +1097,7 @@ function loadJSON(key, fallback) {
     return fallback;
   }
 }
+
 function saveJSON(key, val) {
   localStorage.setItem(key, JSON.stringify(val));
 }
@@ -1079,22 +1107,26 @@ function startOfDay(d) {
   x.setHours(0, 0, 0, 0);
   return x;
 }
+
 function sameDay(a, b) {
   return a.getFullYear() === b.getFullYear() &&
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
 }
+
 function startOfWeek(d) {
   const x = startOfDay(d);
-  const dow = x.getDay(); // 0=dom
+  const dow = x.getDay();
   x.setDate(x.getDate() - dow);
   return x;
 }
+
 function addDays(d, n) {
   const x = new Date(d);
   x.setDate(x.getDate() + n);
   return x;
 }
+
 function addMonths(d, n) {
   const x = new Date(d);
   x.setMonth(x.getMonth() + n);
@@ -1102,7 +1134,7 @@ function addMonths(d, n) {
 }
 
 /* =======================
-   Header (menú mobile + logout)
+   Header
    ======================= */
 (function initHeaderLexa() {
   const btn = document.getElementById("btnMenuToggle");
@@ -1116,6 +1148,7 @@ function addMonths(d, n) {
     btn?.setAttribute("aria-expanded", "true");
     document.body.style.overflow = "hidden";
   }
+
   function closeMenu() {
     if (!menu) return;
     menu.hidden = true;
@@ -1140,13 +1173,190 @@ function addMonths(d, n) {
     localStorage.removeItem(LS.session);
     goPage("index.html");
   }
+
   logoutTop?.addEventListener("click", doLogout);
   logoutMobile?.addEventListener("click", doLogout);
 
   const route = (document.body.dataset.route || "").trim();
   document.querySelectorAll("[data-route]").forEach(a => {
-    if (route && a.getAttribute("data-route") === route) a.classList.add("is-active");
+    if (route && a.getAttribute("data-route") === route) {
+      a.classList.add("is-active");
+    }
   });
 })();
 
+/* =======================
+   Perfil de Usuario
+   ======================= */
+document.addEventListener("DOMContentLoaded", () => {
+  const btnDebito = document.getElementById("btnDebitoAutomatico");
+  const btnDelete = document.getElementById("btnDeleteAccount");
+  const btnLogoutProfile = document.getElementById("btnLogoutProfile");
+
+  if (btnDebito) {
+    btnDebito.addEventListener("click", async () => {
+      const result = await Swal.fire({
+        title: "¿Adherirte a débito automático?",
+        text: "Tu cuota pasará a cobrarse automáticamente todos los meses.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sí, adherirme",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#005ba5"
+      });
+
+      if (result.isConfirmed) {
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          icon: "success",
+          title: "Solicitud enviada correctamente",
+          showConfirmButton: false,
+          timer: 2200,
+          timerProgressBar: true
+        });
+      }
+    });
+  }
+
+if (btnDelete) {
+  btnDelete.addEventListener("click", async () => {
+    const primary = getComputedStyle(document.documentElement)
+      .getPropertyValue("--primary")
+      .trim() || "#22769B";
+
+    const secondary = getComputedStyle(document.documentElement)
+      .getPropertyValue("--secondary")
+      .trim() || "#94a3b8";
+
+    if (typeof Swal === "undefined") {
+      const ok = window.confirm("¿Eliminar cuenta?");
+      if (!ok) return;
+    } else {
+      const result = await Swal.fire({
+        title: "Eliminar cuenta",
+        text: "Esta acción no se puede deshacer.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Eliminar cuenta",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: primary,
+        cancelButtonColor: secondary,
+        reverseButtons: true,
+        iconColor: "#EC5B29",
+        customClass: {
+          confirmButton: "swal-btn-primary",
+          cancelButton: "swal-btn-secondary"
+        },
+        buttonsStyling: false
+      });
+
+      if (!result.isConfirmed) return;
+    }
+
+    localStorage.removeItem(LS.session);
+
+    await Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: "Cuenta eliminada correctamente",
+      showConfirmButton: false,
+      timer: 1400,
+      timerProgressBar: true,
+      iconColor: primary
+    });
+
+    window.location.href = "index.html";
+  });
+}
+  if (btnLogoutProfile) {
+    btnLogoutProfile.addEventListener("click", () => {
+      localStorage.removeItem(LS.session);
+      window.location.href = "index.html";
+    });
+  }
+
+  const links = document.querySelectorAll(".profile-nav-link");
+  const sections = document.querySelectorAll(".profile-section");
+
+  function updateActiveLink() {
+    let currentId = "";
+
+    sections.forEach(section => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top <= 180) currentId = section.id;
+    });
+
+    links.forEach(link => {
+      link.classList.toggle("is-active", link.getAttribute("href") === "#" + currentId);
+    });
+  }
+
+  window.addEventListener("scroll", updateActiveLink);
+  updateActiveLink();
+});
+
+/* =======================
+   Cambiar clave
+   ======================= */
+function bindChangePassword() {
+  const btnSavePassword = document.getElementById("btnSavePassword");
+  if (!btnSavePassword) return;
+
+  btnSavePassword.addEventListener("click", async () => {
+    const oldPass = document.getElementById("oldPassword")?.value.trim() || "";
+    const newPass = document.getElementById("newPassword")?.value.trim() || "";
+    const repeatPass = document.getElementById("repeatPassword")?.value.trim() || "";
+
+    if (!oldPass || !newPass || !repeatPass) {
+      Swal.fire("Faltan datos", "Completá todos los campos.", "warning");
+      return;
+    }
+
+    if (newPass !== repeatPass) {
+      Swal.fire("Error", "La nueva contraseña no coincide.", "error");
+      return;
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Contraseña actualizada",
+      text: "Los cambios se guardaron correctamente."
+    }).then(() => {
+      window.location.href = "perfil.html";
+    });
+  });
+}
+
+/* =======================
+   Perfil: cargar datos
+   ======================= */
+function bindProfileData() {
+  const user = loadJSON(LS.session, null);
+  if (!user) return;
+
+  const rawName = (user.username || "Usuario").trim();
+
+  const initials = rawName
+    .split(" ")
+    .filter(Boolean)
+    .map(part => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "US";
+
+  const headerAvatar = document.getElementById("headerAvatar");
+  const profileAvatar = document.getElementById("profileAvatar");
+  const profileName = document.getElementById("profileName");
+
+  if (headerAvatar) headerAvatar.textContent = initials;
+  if (profileAvatar) profileAvatar.textContent = initials;
+  if (profileName) profileName.textContent = rawName;
+}
+
+/* =======================
+   INIT
+   ======================= */
+bindChangePassword();
 init();

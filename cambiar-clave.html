@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nexus Sport - Cambiar contraseña</title>
+
+  <link rel="stylesheet" href="static/css/styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body data-page="cambiar-clave">
+
+<header class="topbar" id="appHeader">
+  <div class="topbar-inner">
+    <div class="container topbar-row">
+      <a class="brand" href="dashboard.html" aria-label="Ir a Dashboard">
+        <img class="brand-logo brand-logo--desktop" src="static/images/logo-desktop.svg" alt="Turnero Club" />
+        <img class="brand-logo brand-logo--mobile" src="static/images/isologo-mobile.svg" alt="TC" />
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="auth-card auth-card--wide">
+    <a href="perfil.html" class="btn-secondary btn-back-profile">
+      <i class="mdi mdi-arrow-left"></i>
+      <span>Volver a Mi Perfil</span>
+    </a>
+
+    <h1>Cambiar contraseña</h1>
+
+    <label class="field">
+      <span>Contraseña actual</span>
+      <input type="password" id="oldPassword" autocomplete="current-password">
+    </label>
+
+    <label class="field">
+      <span>Nueva contraseña</span>
+      <input type="password" id="newPassword" autocomplete="new-password">
+    </label>
+
+    <label class="field">
+      <span>Repetir nueva contraseña</span>
+      <input type="password" id="repeatPassword" autocomplete="new-password">
+    </label>
+
+    <button class="btn-primary btn-save-password" id="btnSavePassword">
+      Guardar
+    </button>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.getElementById("btnSavePassword").addEventListener("click", async () => {
+    const oldPass = document.getElementById("oldPassword").value.trim();
+    const newPass = document.getElementById("newPassword").value.trim();
+    const repeatPass = document.getElementById("repeatPassword").value.trim();
+
+    if (!oldPass || !newPass || !repeatPass) {
+      Swal.fire("Faltan datos", "Completá todos los campos.", "warning");
+      return;
+    }
+
+    if (newPass !== repeatPass) {
+      Swal.fire("Error", "La nueva contraseña no coincide.", "error");
+      return;
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Contraseña actualizada",
+      text: "Los cambios se guardaron correctamente."
+    }).then(() => {
+      window.location.href = "perfil.html";
+    });
+  });
+</script>
+</body>
+</html>

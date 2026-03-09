@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nexus Sport - Mi Perfil</title>
+
+  <link rel="stylesheet" href="static/css/styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body data-page="perfil">
+
+  <header class="topbar" id="appHeader">
+    <div class="topbar-inner">
+      <div class="container topbar-row">
+        <a class="brand" href="dashboard.html" aria-label="Ir a Dashboard">
+          <img class="brand-logo brand-logo--desktop" src="static/images/logo-desktop.svg" alt="Turnero Club" />
+          <img class="brand-logo brand-logo--mobile" src="static/images/isologo-mobile.svg" alt="TC" />
+        </a>
+
+        <div class="topbar-actions">
+          <button class="Btn-logout" id="btnLogoutTop" aria-label="Cerrar sesión" type="button">
+            <div class="sign">
+              <svg viewBox="0 0 512 512" aria-hidden="true">
+                <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
+              </svg>
+            </div>
+            <div class="text">Cerrar Sesión</div>
+          </button>
+
+          <!-- Avatar -->
+          <a class="avatar avatar-link" id="headerAvatar" title="Mi perfil" href="perfil.html" aria-label="Ir a mi perfil">US</a>
+
+          <button
+            class="icon-btn menu-toggle"
+            id="btnMenuToggle"
+            type="button"
+            aria-label="Abrir menú"
+            aria-expanded="false"
+            aria-controls="mobileMenu"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16v2H4V7zm0 6h16v2H4v-2zm0 6h16v2H4v-2z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <section class="page-title">
+      <div class="container page-title-inner">
+        <div class="page-title-left">
+          <h1 class="pageTitle">Mi Perfil</h1>
+        </div>
+      </div>
+    </section>
+
+    <div class="mobile-menu" id="mobileMenu" hidden>
+      <div class="mobile-menu-card">
+        <a href="dashboard.html" class="mm-link">Dashboard</a>
+        <a href="reservar.html" class="mm-link">Reservar</a>
+        <a href="mis-turnos.html" class="mm-link">Mis turnos</a>
+        <a href="perfil.html" class="mm-link is-active">Mi perfil</a>
+
+        <div class="mm-sep"></div>
+
+        <button class="mm-logout" id="btnLogoutMobile" type="button">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="container profile-layout">
+
+      <aside class="profile-sidebar">
+        <div class="profile-sidebar-inner">
+          <a href="dashboard.html" class="btn-secondary back-app-btn">
+            <i class="mdi mdi-arrow-left"></i>
+            <span>Regresar a la App</span>
+          </a>
+
+          <nav class="profile-nav" aria-label="Secciones de perfil">
+            <a href="#info-general" class="profile-nav-link is-active">Información general</a>
+            <a href="#clases-facturacion" class="profile-nav-link">Clases abonadas y facturación</a>
+            <a href="#configuracion" class="profile-nav-link">Otras opciones</a>
+          </nav>
+        </div>
+      </aside>
+
+      <section class="profile-main">
+
+        <section class="card profile-section" id="info-general">
+          <h3>Información general</h3>
+
+          <div class="profile-user-box">
+            <div class="profile-photo" id="profileAvatar">US</div>
+
+            <div class="profile-user-data">
+              <div class="profile-row">
+                <span class="profile-label">Nombre</span>
+                <strong id="profileName">Usuario</strong>
+              </div>
+
+              <div class="profile-row">
+                <span class="profile-label">Contraseña</span>
+                <span>••••••••••</span>
+              </div>
+
+              <div class="actions profile-actions-top">
+                <a href="cambiar-clave.html" class="btn-primary">Cambiar contraseña</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card profile-section" id="clases-facturacion">
+          <h3>Clases abonadas y datos de facturación</h3>
+
+          <div class="profile-subsection">
+            <h4>Clases abonadas</h4>
+
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Clase</th>
+                    <th>Días</th>
+                    <th>Horas mensuales</th>
+                  </tr>
+                </thead>
+                <tbody id="profilePaidClasses"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="profile-subsection profile-subsection--spaced">
+            <h4>Datos de facturación</h4>
+
+            <div class="billing-grid">
+              <div class="billing-item">
+                <span class="profile-label">Próximo pago</span>
+                <strong>10/03/2026</strong>
+              </div>
+
+              <div class="billing-item">
+                <span class="profile-label">Modalidad actual</span>
+                <strong>Efectivo en sucursal</strong>
+              </div>
+
+              <div class="billing-item">
+                <span class="profile-label">Estado</span>
+                <strong>Pendiente</strong>
+              </div>
+            </div>
+
+            <div class="actions profile-billing-actions">
+              <button class="btn-primary" id="btnDebitoAutomatico" type="button">
+                Adherirse a débito automático
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card profile-section" id="configuracion">
+          <h3>Otras opciones de configuración</h3>
+
+          <div class="settings-list">
+            <button class="settings-item danger-outline" id="btnDeleteAccount" type="button">
+              <span>Eliminar cuenta</span>
+              <i class="mdi mdi-chevron-right"></i>
+            </button>
+
+            <button class="settings-item" id="btnLogoutProfile" type="button">
+              <span>Cerrar sesión</span>
+              <i class="mdi mdi-logout"></i>
+            </button>
+          </div>
+        </section>
+
+      </section>
+    </div>
+  </main>
+
+  <div class="toasts" id="toasts"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="static/js/app.js"></script>
+</body>
+</html>
