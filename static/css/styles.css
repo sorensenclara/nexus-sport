@@ -1756,7 +1756,16 @@ h1,h2,h3,h4,h5,h6,
   gap:12px;
   margin-top:18px;
   padding-top:18px;
+  padding-bottom: 18px;
   border-top:1px solid #e5e7eb;
+}
+
+.payment-edit-actions[hidden]{
+  display: none !important;
+}
+
+.payment-edit-col[hidden]{
+  display: none !important;
 }
 
 /* tarjeta */
@@ -2154,4 +2163,52 @@ h1,h2,h3,h4,h5,h6,
   .payment-action-confirm{
     width:100%;
   }
+}
+
+.payment-hero-grid{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:40px;
+  align-items:center;
+}
+
+.payment-hero-copy{
+  max-width:600px;
+}
+
+.payment-hero-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+}
+
+.payment-main-cta{
+  min-height:48px;
+  padding:0 24px;
+  font-weight:700;
+  border-radius:32px;
+  white-space:nowrap;
+}
+
+
+@media (max-width: 820px){
+
+  .payment-hero-grid{
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .payment-hero-copy{
+    max-width: 100%;
+  }
+
+  .payment-hero-actions{
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .payment-main-cta{
+    width: 100%;
+  }
+
 }
