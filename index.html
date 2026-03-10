@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nexus Sport - Login</title>
+  <title>Nexus Sport - Ingresar</title>
 
   <link rel="stylesheet" href="static/css/styles.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
@@ -15,38 +15,59 @@
 <header class="topbar" id="appHeader">
   <div class="topbar-inner">
     <div class="container topbar-row">
-      <a class="brand" href="dashboard.html" aria-label="Ir a Dashboard">
-        <img class="brand-logo brand-logo--desktop" src="static/images/logo-desktop.svg" alt="Turnero Club" />
-        <img class="brand-logo brand-logo--mobile" src="static/images/isologo-mobile.svg" alt="TC" />
+      <a class="brand" href="index.html" aria-label="Ir al inicio">
+        <img class="brand-logo brand-logo--desktop" src="static/images/logo-desktop.svg" alt="Nexus Sport" />
+        <img class="brand-logo brand-logo--mobile" src="static/images/isologo-mobile.svg" alt="Nexus Sport" />
       </a>
     </div>
   </div>
 </header>
 
-<main class="container">
-  <div class="auth-card">
-    <h1>Ingresar</h1>
+<main class="content">
+  <div class="container">
+    <section class="auth-card auth-card-login">
+      <div class="auth-head">
+        <h1>Ingresar</h1>
+      </div>
 
-    <label class="field">
-      <span>Usuario</span>
-      <input id="loginUser" type="text" placeholder="ej: maria" autocomplete="username">
-    </label>
+      <div class="auth-form">
+        <label class="field">
+          <span>Usuario</span>
+          <input
+            id="loginUser"
+            type="text"
+            placeholder="Ej: maria"
+            autocomplete="username"
+          >
+        </label>
 
-    <label class="field">
-      <span>Clave</span>
-      <input id="loginPass" type="password" placeholder="cualquiera" autocomplete="current-password">
-    </label>
+        <label class="field">
+          <span>Clave</span>
+          <input
+            id="loginPass"
+            type="password"
+            placeholder="Ingresá tu clave"
+            autocomplete="current-password"
+          >
+        </label>
 
-    <button class="btn-primary" id="btnLogin" style="margin-top: 16px;">Entrar</button>
+        <button class="btn-primary btn-lg auth-submit" id="btnLogin" type="button">
+          Entrar
+        </button>
+      </div>
 
-    <div class="hint">
-      Ante cualquier inconveniente contactar 
-      <b>info@nexus.com.ar</b> o 
-      <b>+549 2494 505050</b>.
-    </div>
+      <p class="auth-help">
+        ¡Ante cualquier inconveniente contactanos
+        <a href="mailto:info@nexus.com.ar">info@nexus.com.ar</a>
+        o al
+        <a href="https://wa.me/5492494505050" target="_blank" rel="noopener noreferrer">
+          +54 9 2494 505050
+        </a>
+      </p>
+    </section>
+
+    <div class="toasts" id="toasts"></div>
   </div>
-
-  <div class="toasts" id="toasts"></div>
 </main>
 
 <script src="static/js/app.js"></script>
