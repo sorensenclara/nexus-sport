@@ -114,52 +114,66 @@
           </div>
         </section>
 
-        <section class="card profile-section" id="clases-facturacion">
-          <h3>Clases abonadas y datos de facturación</h3>
-
-          <div class="profile-subsection">
-            <h4>Clases abonadas</h4>
-
-            <div class="table-wrap">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Clase</th>
-                    <th>Días</th>
-                    <th>Horas mensuales</th>
-                  </tr>
-                </thead>
-                <tbody id="profilePaidClasses"></tbody>
-              </table>
+        <section class="card profile-section payment-section" id="clases-facturacion">
+          <div class="payment-section-head">
+            <div>
+              <h3>Abonos y modalidad de pago</h3>
+              <p class="payment-section-subtitle">
+                Consultá tus abonos activos, cuánto pagás por mes y qué actividades tenés adheridas.
+              </p>
             </div>
           </div>
 
-          <div class="profile-subsection profile-subsection--spaced">
-            <h4>Datos de facturación</h4>
+          <!-- DESKTOP -->
+          <div class="payment-table-wrap">
+            <table class="table payment-table">
+              <thead>
+                <tr>
+                  <th>Actividad</th>
+                  <th>Horas mensuales</th>
+                  <th>Valor mensual</th>
+                  <th>Forma de pago</th>
+                  <th>Beneficio</th>
+                  <th>Estado</th>
+                  <th class="payment-edit-col" id="paymentEditHead" hidden>Adherir</th>
+                </tr>
+              </thead>
+              <tbody id="profilePaymentsTable"></tbody>
+            </table>
+          </div>
 
-            <div class="billing-grid">
-              <div class="billing-item">
-                <span class="profile-label">Próximo pago</span>
-                <strong>10/03/2026</strong>
-              </div>
+          <!-- MOBILE -->
+          <div class="payment-cards" id="profilePaymentsCards"></div>
 
-              <div class="billing-item">
-                <span class="profile-label">Modalidad actual</span>
-                <strong>Efectivo en sucursal</strong>
-              </div>
+          <!-- CTA -->
+          <div class="payment-hero" id="paymentHero">
+            <div class="payment-hero-badge">10% OFF</div>
 
-              <div class="billing-item">
-                <span class="profile-label">Estado</span>
-                <strong>Pendiente</strong>
-              </div>
+            <div class="payment-hero-copy">
+              <h4>Activá débito automático</h4>
+              <p>
+                Pagá tus abonos mensuales de forma automática y obtené
+                <strong>10% de descuento</strong> en las actividades adheridas.
+              </p>
             </div>
 
-            <div class="actions profile-billing-actions">
-              <button class="btn-primary" id="btnDebitoAutomatico" type="button">
-                Adherirse a débito automático
+            <div class="payment-hero-actions">
+              <button class="btn-primary payment-main-cta" id="btnEditPayments" type="button">
+                Activar débito automático
               </button>
             </div>
           </div>
+
+          <!-- BTN adherir debito -->
+          <div class="payment-edit-actions" id="paymentEditActions" hidden>
+            <button class="btn-secondary payment-action-cancel" id="btnCancelPaymentsEdit" type="button">
+              Cancelar cambios
+            </button>
+            <button class="btn-primary payment-action-confirm" id="btnGoToDebitCard" type="button">
+              Adherir tarjeta
+            </button>
+          </div>
+
         </section>
 
         <section class="card profile-section" id="configuracion">

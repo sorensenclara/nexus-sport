@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nexus Sport - Adherir débito automático</title>
+
+  <link rel="stylesheet" href="static/css/styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body data-page="adherir-debito">
+
+  <header class="topbar" id="appHeader">
+    <div class="topbar-inner">
+      <div class="container topbar-row">
+        <a class="brand" href="dashboard.html" aria-label="Ir a Dashboard">
+          <img class="brand-logo brand-logo--desktop" src="static/images/logo-desktop.svg" alt="Turnero Club" />
+          <img class="brand-logo brand-logo--mobile" src="static/images/isologo-mobile.svg" alt="TC" />
+        </a>
+
+        <div class="topbar-actions">
+          <a class="avatar avatar-link" id="headerAvatar" title="Mi perfil" href="perfil.html" aria-label="Ir a mi perfil">US</a>
+        </div>
+      </div>
+    </div>
+
+    <section class="page-title">
+      <div class="container page-title-inner">
+        <div class="page-title-left">
+          <h1 class="pageTitle">Adherir débito automático</h1>
+        </div>
+      </div>
+    </section>
+  </header>
+
+  <main class="content">
+    <div class="container">
+      <section class="card debit-card-page">
+        <div class="debit-card-header">
+          <h3>Confirmá tu adhesión</h3>
+          <p>
+            Estás por adherir los siguientes abonos al débito automático.
+            <strong>Recordá que obtenés 10% de descuento.</strong>
+          </p>
+        </div>
+
+        <div class="debit-selected-list" id="debitSelectedList"></div>
+
+        <form class="debit-form" id="debitCardForm">
+          <label class="field">
+            <span>Nombre del titular</span>
+            <input type="text" id="cardHolder" placeholder="Como figura en la tarjeta" />
+          </label>
+
+          <label class="field">
+            <span>Número de tarjeta</span>
+            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" />
+          </label>
+
+          <div class="debit-form-grid">
+            <label class="field">
+              <span>Vencimiento</span>
+              <input type="text" id="cardExpiry" placeholder="MM/AA" />
+            </label>
+
+            <label class="field">
+              <span>CVV</span>
+              <input type="text" id="cardCvv" placeholder="123" />
+            </label>
+          </div>
+
+          <div class="actions debit-form-actions">
+            <a href="perfil.html" class="btn-secondary">Cancelar</a>
+            <button class="btn-primary" id="btnSubmitDebitCard" type="submit">Confirmar adhesión</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <div class="toasts" id="toasts"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="static/js/app.js"></script>
+</body>
+</html>

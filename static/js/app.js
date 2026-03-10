@@ -12,7 +12,9 @@ function goPage(name) {
 const LS = {
   session: "turnero_session_v2",
   reservations: "turnero_reservations_v2",
-  sessions: "turnero_sessions_v2"
+  sessions: "turnero_sessions_v2",
+  paymentPlans: "turnero_payment_plans_v1",
+  paymentDraft: "turnero_payment_draft_v1"
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -26,6 +28,8 @@ let state = {
   view: "WEEK",
   filters: { activity: "ALL", instructor: "", location: "" }
 };
+
+
 
 /* =======================
    Seed demo data
@@ -77,6 +81,34 @@ function getClubSessions() {
 
 function paidActivitiesForUser(_username) {
   return ["Padel", "Pilates", "Gym", "Crossfit"];
+}
+
+function paymentPlansForUser(user) {
+  const paid = user?.paidActivities || [];
+
+  const defaultCatalog = {
+    "Padel": { hours: "8 hs", price: 32000, paymentMethod: "cash", status: "active" },
+    "Pilates": { hours: "4 hs", price: 18000, paymentMethod: "cash", status: "active" },
+    "Gym": { hours: "12 hs", price: 24000, paymentMethod: "cash", status: "active" },
+    "Crossfit": { hours: "8 hs", price: 26000, paymentMethod: "cash", status: "active" }
+  };
+
+  const saved = loadJSON(LS.paymentPlans, null);
+  if (saved && Array.isArray(saved) && saved.length) return saved;
+
+  const plans = paid.map(name => {
+    const base = defaultCatalog[name] || { hours: "—", price: 0, paymentMethod: "cash", status: "active" };
+    return {
+      activity: name,
+      hours: base.hours,
+      price: base.price,
+      paymentMethod: base.paymentMethod,
+      status: base.status
+    };
+  });
+
+  saveJSON(LS.paymentPlans, plans);
+  return plans;
 }
 
 function requireSessionOrRedirect() {
@@ -1033,9 +1065,15 @@ function init() {
   }
 
   if (page === "perfil") {
-    renderProfilePaidClasses();
-    return;
+  renderProfilePaidClasses();
+  bindProfilePayments();
+  return;
   }
+
+  if (page === "adherir-debito") {
+  bindDebitCardForm();
+  return;
+  } 
 }
 
 function renderProfilePaidClasses() {
@@ -1056,6 +1094,245 @@ function renderProfilePaidClasses() {
       <td>—</td>
     </tr>
   `).join("");
+}
+
+function formatCurrencyARS(value) {
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0
+  }).format(value || 0);
+}
+
+function discountedPrice(price) {
+  return Math.round((price || 0) * 0.9);
+}
+
+function paymentMethodLabel(method) {
+  return method === "debit" ? "Débito automático" : "Efectivo";
+}
+
+function paymentBenefitLabel(method) {
+  return method === "debit" ? "10% off" : "—";
+}
+
+function paymentStatusLabel(status, method) {
+  if (method === "debit") return "Adherido";
+  if (status === "active") return "No adherido";
+  return "Pendiente";
+}
+
+function renderProfilePayments(editMode = false) {
+  const tableHost = document.getElementById("profilePaymentsTable");
+  const cardsHost = document.getElementById("profilePaymentsCards");
+  const editHead = document.getElementById("paymentEditHead");
+  const editActions = document.getElementById("paymentEditActions");
+
+  if (!state.user || !tableHost || !cardsHost) return;
+
+  const plans = paymentPlansForUser(state.user);
+  const section = document.querySelector(".payment-section");
+  const hasActiveDebits = plans.some(plan => plan.paymentMethod === "debit");
+
+  if (section) {
+    section.classList.toggle("has-active-debits", hasActiveDebits);
+  }
+
+  if (editHead) editHead.hidden = !editMode;
+  if (editActions) editActions.hidden = !editMode;
+
+  tableHost.innerHTML = plans.map((plan, index) => {
+    const method = paymentMethodLabel(plan.paymentMethod);
+    const benefit = paymentBenefitLabel(plan.paymentMethod);
+    const status = paymentStatusLabel(plan.status, plan.paymentMethod);
+    const canSelect = editMode && plan.paymentMethod !== "debit";
+
+    return `
+      <tr>
+        <td>${esc(plan.activity)}</td>
+        <td>${esc(plan.hours)}</td>
+        <td>${esc(formatCurrencyARS(plan.paymentMethod === "debit" ? discountedPrice(plan.price) : plan.price))}</td>
+        <td>${esc(method)}</td>
+        <td>${esc(benefit)}</td>
+        <td>${esc(status)}</td>
+        ${editMode ? `
+          <td>
+            ${plan.paymentMethod === "debit"
+              ? `<span class="payment-muted">Ya adherido</span>`
+              : `<label class="payment-select">
+                  <input type="checkbox" class="payment-checkbox" data-payment-index="${index}">
+                  <span>Adherir</span>
+                </label>`
+            }
+          </td>
+        ` : ""}
+      </tr>
+    `;
+  }).join("");
+
+  cardsHost.innerHTML = plans.map((plan, index) => {
+    const method = paymentMethodLabel(plan.paymentMethod);
+    const benefit = paymentBenefitLabel(plan.paymentMethod);
+    const status = paymentStatusLabel(plan.status, plan.paymentMethod);
+    const finalPrice = plan.paymentMethod === "debit" ? discountedPrice(plan.price) : plan.price;
+
+    return `
+      <article class="payment-card">
+        <div class="payment-card-head">
+          <div>
+            <h4 class="payment-card-title">${esc(plan.activity)}</h4>
+          </div>
+          <span class="payment-status ${plan.paymentMethod === "debit" ? "is-active" : "is-pending"}">
+            ${esc(status)}
+          </span>
+        </div>
+
+        <div class="payment-card-grid">
+          <div class="payment-meta">
+            <span class="payment-meta-label">Horas mensuales</span>
+            <span class="payment-meta-value">${esc(plan.hours)}</span>
+          </div>
+
+          <div class="payment-meta">
+            <span class="payment-meta-label">Valor mensual</span>
+            <span class="payment-meta-value">${esc(formatCurrencyARS(finalPrice))}</span>
+          </div>
+
+          <div class="payment-meta">
+            <span class="payment-meta-label">Forma de pago</span>
+            <span class="payment-meta-value">${esc(method)}</span>
+          </div>
+
+          <div class="payment-meta">
+            <span class="payment-meta-label">Beneficio</span>
+            <span class="payment-meta-value ${plan.paymentMethod === "debit" ? "payment-discount" : "payment-muted"}">
+              ${esc(benefit)}
+            </span>
+          </div>
+        </div>
+
+        ${editMode ? `
+          <div style="margin-top:14px;">
+            ${plan.paymentMethod === "debit"
+              ? `<span class="payment-muted">Ya adherido al débito automático</span>`
+              : `<label class="payment-select">
+                  <input type="checkbox" class="payment-checkbox" data-payment-index="${index}">
+                  <span>Pasar este abono a débito automático</span>
+                </label>`
+            }
+          </div>
+        ` : ""}
+      </article>
+    `;
+  }).join("");
+}
+
+function bindProfilePayments() {
+  const btnEdit = document.getElementById("btnEditPayments");
+  const btnCancel = document.getElementById("btnCancelPaymentsEdit");
+  const btnContinue = document.getElementById("btnGoToDebitCard");
+
+  if (!btnEdit) return;
+
+  let editMode = false;
+
+  function refresh() {
+    renderProfilePayments(editMode);
+  }
+
+  btnEdit.addEventListener("click", () => {
+    editMode = true;
+    refresh();
+  });
+
+  btnCancel?.addEventListener("click", () => {
+    editMode = false;
+    localStorage.removeItem(LS.paymentDraft);
+    refresh();
+  });
+
+  btnContinue?.addEventListener("click", () => {
+    const checked = Array.from(document.querySelectorAll(".payment-checkbox:checked"))
+      .map(el => Number(el.getAttribute("data-payment-index")));
+
+    if (!checked.length) {
+      showAlert("bad", "Seleccioná al menos un abono", "Elegí qué actividades querés adherir al débito automático.");
+      return;
+    }
+
+    saveJSON(LS.paymentDraft, checked);
+    window.location.href = "adherir-debito.html";
+  });
+
+  refresh();
+}
+
+function renderDebitSelectedList() {
+  const host = document.getElementById("debitSelectedList");
+  if (!host || !state.user) return;
+
+  const plans = paymentPlansForUser(state.user);
+  const selectedIndexes = loadJSON(LS.paymentDraft, []);
+  const selectedPlans = plans.filter((_, idx) => selectedIndexes.includes(idx));
+
+  host.innerHTML = selectedPlans.map(plan => `
+    <div class="debit-selected-item">
+      <div>
+        <strong>${esc(plan.activity)}</strong><br>
+        <span class="payment-muted">${esc(plan.hours)} · ${esc(formatCurrencyARS(discountedPrice(plan.price)))}</span>
+      </div>
+      <span class="payment-discount">10% off</span>
+    </div>
+  `).join("");
+}
+
+function bindDebitCardForm() {
+  const form = document.getElementById("debitCardForm");
+  if (!form || !state.user) return;
+
+  renderDebitSelectedList();
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const holder = (document.getElementById("cardHolder")?.value || "").trim();
+    const number = (document.getElementById("cardNumber")?.value || "").trim();
+    const expiry = (document.getElementById("cardExpiry")?.value || "").trim();
+    const cvv = (document.getElementById("cardCvv")?.value || "").trim();
+
+    if (!holder || !number || !expiry || !cvv) {
+      showAlert("bad", "Faltan datos", "Completá todos los campos de la tarjeta.");
+      return;
+    }
+
+    const plans = paymentPlansForUser(state.user);
+    const selectedIndexes = loadJSON(LS.paymentDraft, []);
+
+    const updatedPlans = plans.map((plan, idx) => {
+      if (selectedIndexes.includes(idx)) {
+        return {
+          ...plan,
+          paymentMethod: "debit"
+        };
+      }
+      return plan;
+    });
+
+    saveJSON(LS.paymentPlans, updatedPlans);
+    localStorage.removeItem(LS.paymentDraft);
+
+    await Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: "Tu adhesión al débito automático fue exitosa",
+      showConfirmButton: false,
+      timer: 1800,
+      timerProgressBar: true
+    });
+
+    window.location.href = "perfil.html";
+  });
 }
 
 /* =======================
