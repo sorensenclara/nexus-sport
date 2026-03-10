@@ -12,31 +12,25 @@
 <body data-page="reservar">
 
 <header class="topbar" id="appHeader">
-  <!-- TOPBAR (AZUL) -->
   <div class="topbar-inner">
     <div class="container topbar-row">
-      <!-- Brand-->
       <a class="brand" href="dashboard.html" aria-label="Ir a Dashboard">
         <img class="brand-logo brand-logo--desktop" src="static/images/logo-desktop.svg" alt="Turnero Club" />
         <img class="brand-logo brand-logo--mobile" src="static/images/isologo-mobile.svg" alt="TC" />
       </a>
 
-      <!-- Right actions -->
       <div class="topbar-actions">
-        <!-- Logout (desktop) -->
-        <button class="Btn-logout" id="btnLogoutTop" aria-label="Cerrar sesión">
+        <button class="Btn-logout" id="btnLogoutTop" aria-label="Cerrar sesión" type="button">
           <div class="sign">
             <svg viewBox="0 0 512 512">
               <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
-             </svg>
+            </svg>
           </div>
           <div class="text">Cerrar Sesión</div>
         </button>
 
-        <!-- Avatar -->
         <a class="avatar avatar-link" id="headerAvatar" title="Mi perfil" href="perfil.html" aria-label="Ir a mi perfil">US</a>
 
-        <!-- Burger (mobile) -->
         <button class="icon-btn menu-toggle" id="btnMenuToggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 7h16v2H4V7zm0 6h16v2H4v-2zm0 6h16v2H4v-2z"></path>
@@ -46,7 +40,6 @@
     </div>
   </div>
 
-  <!-- PAGE TITLE -->
   <section class="page-title">
     <div class="container page-title-inner">
       <div class="page-title-left">
@@ -55,7 +48,6 @@
     </div>
   </section>
 
-  <!-- SUBNAV-->
   <nav class="subnav" aria-label="Navegación">
     <div class="container">
       <div class="subnav-float" id="subnavInner">
@@ -75,7 +67,6 @@
     </div>
   </nav>
 
-  <!-- MOBILE MENU (dropdown) -->
   <div class="mobile-menu" id="mobileMenu" hidden>
     <div class="mobile-menu-card">
       <a href="dashboard.html" data-route="dashboard" class="mm-link">Dashboard</a>
@@ -92,16 +83,18 @@
 <main class="content">
   <div class="container">
 
-    <!-- Botón Filtros (solo mobile) -->
-    <button class="filters-toggle" id="btnFiltersToggle" type="button" aria-expanded="false" aria-controls="filtersBody">
+    <button
+      class="filters-toggle"
+      id="btnFiltersToggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="filtersCard"
+    >
       <i class="mdi mdi-filter-variant" aria-hidden="true"></i>
       <span>Filtros</span>
     </button>
 
-    <section class="card filters-card" id="filtersCard" style="margin-top:12px;">
-      <h3 style="margin-bottom:10px;">Filtro</h3>
-
-      <!-- Todo lo que se colapsa en mobile -->
+    <section class="card filters-card" id="filtersCard">
       <div class="filters-body" id="filtersBody">
         <div class="filters-grid">
           <div class="filters-left">
@@ -121,6 +114,7 @@
                 <select id="filterLocation"></select>
               </label>
             </div>
+
             <p class="help">Solo se muestran turnos con cupos disponibles (y que no tengas ya reservados).</p>
           </div>
 
@@ -129,28 +123,37 @@
           </aside>
         </div>
       </div>
+
+      <div class="filters-head">
+        <h3>Filtro</h3>
+
+        <div class="filters-mobile-actions">
+          <button class="btn-secondary btn-filter-close" id="btnCloseFilters" type="button">Cerrar</button>
+          <button class="btn-primary btn-filter-apply" id="btnApplyFilters" type="button">Aplicar filtros</button>
+        </div>
+      </div>
     </section>
 
     <div class="grid-2 calendar-wrap" style="margin-top:16px;">
       <section class="card">
         <div class="calendar-head">
-          <button class="icon-btn" id="btnPrev" aria-label="Anterior">‹</button>
+          <button class="icon-btn" id="btnPrev" aria-label="Anterior" type="button">‹</button>
 
-          <div style="min-width:0">
-            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+          <div class="calendar-head-center">
+            <div class="calendar-head-top">
               <div>
                 <div style="font-weight:900" id="calTitle">Semana</div>
                 <div class="muted-dark small" id="calSub">—</div>
               </div>
 
               <div class="view-switch">
-                <div class="pill active" id="pillWeek">Semana</div>
-                <div class="pill" id="pillMonth">Mes</div>
+                <button class="pill active" id="pillWeek" type="button">Semana</button>
+                <button class="pill" id="pillMonth" type="button">Mes</button>
               </div>
             </div>
           </div>
 
-          <button class="icon-btn" id="btnNext" aria-label="Siguiente">›</button>
+          <button class="icon-btn" id="btnNext" aria-label="Siguiente" type="button">›</button>
         </div>
 
         <div class="calendar-scroll">
@@ -175,44 +178,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="static/js/app.js" defer></script>
-
-<!-- Toggle filtros SOLO en mobile (no afecta desktop) -->
-<script>
-  (function(){
-    const btn = document.getElementById("btnFiltersToggle");
-    const card = document.getElementById("filtersCard");
-    const body = document.getElementById("filtersBody");
-
-    if(!btn || !card || !body) return;
-
-    function isMobile(){
-      return window.matchMedia("(max-width: 820px)").matches;
-    }
-
-    function sync(){
-      if(!isMobile()){
-        // En desktop siempre visible
-        card.classList.add("is-open");
-        body.style.display = "block";
-        btn.setAttribute("aria-expanded","true");
-        return;
-      }
-      // En mobile: por defecto abierto (si querés cerrado, cambiá a remove)
-      card.classList.add("is-open");
-      btn.setAttribute("aria-expanded","true");
-    }
-
-    btn.addEventListener("click", () => {
-      if(!isMobile()) return;
-      card.classList.toggle("is-open");
-      const open = card.classList.contains("is-open");
-      btn.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-
-    window.addEventListener("resize", sync);
-    sync();
-  })();
-</script>
 
 </body>
 </html>

@@ -314,9 +314,7 @@ function setViewSwitchUI() {
   pillMonth?.classList.toggle("active", state.view === "MONTH");
 }
 
-document.getElementById("btnFilterToggle")?.addEventListener("click", () => {
-  document.getElementById("filtersBody")?.classList.toggle("open");
-});
+
 
 function bindViewSwitch() {
   const pillWeek = $("#pillWeek");
@@ -946,29 +944,26 @@ function bindReservarNav() {
   if (page) $(`.subnav-inner a[data-route="${page}"]`)?.classList.add("active");
 }
 
-function bindFiltersToggle() {
-  const card = document.querySelector(".filters");
-  const btn = document.getElementById("btnFiltersToggle");
-  if (!card || !btn) return;
 
-  function syncByBreakpoint() {
-    const isMobile = window.matchMedia("(max-width: 820px)").matches;
-    if (!isMobile) {
-      card.classList.add("is-open");
-      btn.setAttribute("aria-expanded", "true");
-    } else {
-      card.classList.remove("is-open");
-      btn.setAttribute("aria-expanded", "false");
-    }
-  }
+function bindFiltersMobile() {
+  const btnOpen = document.getElementById("btnFiltersToggle");
+  const btnClose = document.getElementById("btnCloseFilters");
+  const btnApply = document.getElementById("btnApplyFilters");
+  const card = document.getElementById("filtersCard");
 
-  btn.addEventListener("click", () => {
-    const open = card.classList.toggle("is-open");
-    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  if (!card) return;
+
+  btnOpen?.addEventListener("click", () => {
+    card.classList.add("is-open");
   });
 
-  window.addEventListener("resize", syncByBreakpoint);
-  syncByBreakpoint();
+  btnClose?.addEventListener("click", () => {
+    card.classList.remove("is-open");
+  });
+
+  btnApply?.addEventListener("click", () => {
+    card.classList.remove("is-open");
+  });
 }
 
 /* =======================
@@ -1019,6 +1014,7 @@ function init() {
 
     bindViewSwitch();
     bindReservarNav();
+    bindFiltersMobile();
     renderFilters();
     setViewSwitchUI();
     renderCalendar();
