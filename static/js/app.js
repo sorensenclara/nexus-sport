@@ -183,28 +183,42 @@ function renderFilters() {
   const paid = state.user?.paidActivities || [];
   const paidSessions = sessions.filter(s => paid.includes(s.activity));
 
-  const activities = ["ALL", ...unique(paidSessions.map(s => s.activity))];
-  const instructors = ["", ...unique(paidSessions.map(s => s.instructor))];
-  const locations = ["", ...unique(paidSessions.map(s => s.location))];
-
   const actSel = $("#filterActivity");
   const instSel = $("#filterInstructor");
   const locSel = $("#filterLocation");
 
+  const activities = ["ALL", ...unique(paidSessions.map(s => s.activity))];
+
+  const activityBase =
+    state.filters.activity === "ALL"
+      ? []
+      : paidSessions.filter(s => s.activity === state.filters.activity);
+
+  let instructors = [""];
+  let locations = [""];
+
+  if (state.filters.activity !== "ALL") {
+    let forInstructor = [...activityBase];
+    let forLocation = [...activityBase];
+
+    if (state.filters.location) {
+      forInstructor = forInstructor.filter(s => s.location === state.filters.location);
+    }
+
+    if (state.filters.instructor) {
+      forLocation = forLocation.filter(s => s.instructor === state.filters.instructor);
+    }
+
+    instructors = ["", ...unique(forInstructor.map(s => s.instructor))];
+    locations = ["", ...unique(forLocation.map(s => s.location))];
+  }
+
   if (actSel) {
     actSel.innerHTML = activities.map(a => {
-      const label = (a === "ALL") ? "Todas (abonadas)" : a;
+      const label = (a === "ALL") ? "Todas mis clases" : a;
       return `<option value="${escAttr(a)}">${esc(label)}</option>`;
     }).join("");
     actSel.value = state.filters.activity;
-  }
-
-  if (instSel) {
-    instSel.innerHTML = instructors.map(i => {
-      const label = i ? i : "Todos";
-      return `<option value="${escAttr(i)}">${esc(label)}</option>`;
-    }).join("");
-    instSel.value = state.filters.instructor;
   }
 
   if (locSel) {
@@ -212,29 +226,142 @@ function renderFilters() {
       const label = l ? l : "Todos";
       return `<option value="${escAttr(l)}">${esc(label)}</option>`;
     }).join("");
+
+    if (!locations.includes(state.filters.location)) {
+      state.filters.location = "";
+    }
+
     locSel.value = state.filters.location;
+    locSel.disabled = state.filters.activity === "ALL";
   }
 
-  actSel?.addEventListener("change", () => {
+  if (instSel) {
+    instSel.innerHTML = instructors.map(i => {
+      const label = i ? i : "Todos";
+      return `<option value="${escAttr(i)}">${esc(label)}</option>`;
+    }).join("");
+
+    if (!instructors.includes(state.filters.instructor)) {
+      state.filters.instructor = "";
+    }
+
+    instSel.value = state.filters.instructor;
+    instSel.disabled = state.filters.activity === "ALL";
+  }
+
+  actSel.onchange = () => {
     state.filters.activity = actSel.value;
+
+    if (state.filters.activity === "ALL") {
+      state.filters.location = "";
+      state.filters.instructor = "";
+    } else {
+      const activitySessions = paidSessions.filter(s => s.activity === state.filters.activity);
+
+      const validLocations = unique(activitySessions.map(s => s.location));
+      const validInstructors = unique(activitySessions.map(s => s.instructor));
+
+      if (!validLocations.includes(state.filters.location)) {
+        state.filters.location = "";
+      }
+
+      if (!validInstructors.includes(state.filters.instructor)) {
+        state.filters.instructor = "";
+      }
+    }
+
+    renderFilters();
     renderActivityLegend();
     renderCalendar();
     renderDaySlots();
-  });
+  };
 
-  instSel?.addEventListener("change", () => {
-    state.filters.instructor = instSel.value;
-    renderCalendar();
-    renderDaySlots();
-  });
-
-  locSel?.addEventListener("change", () => {
+  locSel.onchange = () => {
     state.filters.location = locSel.value;
+
+    if (state.filters.activity !== "ALL") {
+      const activitySessions = paidSessions
+        .filter(s => s.activity === state.filters.activity)
+        .filter(s => !state.filters.location || s.location === state.filters.location);
+
+      const validInstructors = unique(activitySessions.map(s => s.instructor));
+      if (!validInstructors.includes(state.filters.instructor)) {
+        state.filters.instructor = "";
+      }
+    }
+
+    renderFilters();
     renderCalendar();
     renderDaySlots();
-  });
+  };
+
+  instSel.onchange = () => {
+    state.filters.instructor = instSel.value;
+
+    if (state.filters.activity !== "ALL") {
+      const activitySessions = paidSessions
+        .filter(s => s.activity === state.filters.activity)
+        .filter(s => !state.filters.instructor || s.instructor === state.filters.instructor);
+
+      const validLocations = unique(activitySessions.map(s => s.location));
+      if (!validLocations.includes(state.filters.location)) {
+        state.filters.location = "";
+      }
+    }
+
+    renderFilters();
+    renderCalendar();
+    renderDaySlots();
+  };
 
   renderActivityLegend();
+  syncFiltersUI();
+}
+
+function getFilteredSessionsForSelectors() {
+  const sessions = getClubSessions();
+  const paid = state.user?.paidActivities || [];
+
+  let base = sessions.filter(s => paid.includes(s.activity));
+
+  if (state.filters.activity !== "ALL") {
+    base = base.filter(s => s.activity === state.filters.activity);
+  }
+
+  return base;
+}
+
+function buildFilterSummaryText() {
+  const act = state.filters.activity === "ALL" ? "Todas mis clases" : state.filters.activity;
+  const loc = state.filters.location || "Todos";
+  const inst = state.filters.instructor || "Todos";
+  return `Actividad: ${act} · Lugar: ${loc} · Profesor: ${inst}`;
+}
+
+function syncFiltersUI() {
+  const card = document.getElementById("filtersCard");
+  const btnToggle = document.getElementById("btnFiltersToggle");
+  const btnClose = document.getElementById("btnCloseFilters");
+  const body = document.getElementById("filtersBody");
+  const summary = document.getElementById("filtersSummary");
+  const summaryText = document.getElementById("filtersSummaryText");
+
+  if (!card || !body || !btnToggle) return;
+
+  const isOpen = card.classList.contains("is-open");
+
+  body.hidden = !isOpen;
+
+  if (summary) {
+    summary.hidden = isOpen;
+  }
+
+  if (summaryText) {
+    summaryText.textContent = buildFilterSummaryText();
+  }
+
+  btnToggle.setAttribute("aria-expanded", String(isOpen));
+  if (btnClose) btnClose.setAttribute("aria-expanded", String(isOpen));
 }
 
 /* =======================
@@ -387,17 +514,35 @@ function monthPillsHtml(dayDate) {
   const slots = slotsForDayAll(dayDate);
   if (!slots.length) return `<div class="events"></div>`;
 
-  const maxShow = 2;
+  const isMobileMonth = window.matchMedia("(max-width: 820px)").matches;
+  const maxShow = isMobileMonth ? 1 : 2;
+
   const shown = slots.slice(0, maxShow);
   const rest = slots.length - shown.length;
 
   const pills = shown.map(s => {
     const t = fmtTime(new Date(s.startISO));
     const cls = activityClass(s.activity);
-    return `<div class="event-pill ${cls}" data-slot="${escAttr(s.id)}">${esc(t)} ${esc(s.activity)}</div>`;
+
+    if (isMobileMonth) {
+      return `
+        <div class="event-pill ${cls} compact" data-slot="${escAttr(s.id)}">
+          <span class="event-time">${esc(t)}</span>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="event-pill ${cls}" data-slot="${escAttr(s.id)}">
+        ${esc(t)} ${esc(s.activity)}
+      </div>
+    `;
   }).join("");
 
-  const more = rest > 0 ? `<div class="event-pill more-pill" data-more="1">+${rest} more</div>` : "";
+  const more = rest > 0
+    ? `<div class="event-pill more-pill" data-more="1">+${rest}</div>`
+    : "";
+
   return `<div class="events">${pills}${more}</div>`;
 }
 
@@ -432,6 +577,7 @@ function renderWeekGrid() {
       state.selectedDate = startOfDay(day);
       renderWeekGrid();
       renderDaySlots();
+      scrollToSlotsMobile();
     });
 
     weekGrid.appendChild(cell);
@@ -478,6 +624,7 @@ function renderMonthGrid() {
       state.monthCursor = new Date(day.getFullYear(), day.getMonth(), 1);
       renderCalendar();
       renderDaySlots();
+      scrollToSlotsMobile();
     });
 
     monthGrid.appendChild(cell);
@@ -497,6 +644,7 @@ function renderMonthGrid() {
 
       renderCalendar();
       renderDaySlots();
+      scrollToSlotsMobile();
     });
   });
 
@@ -504,6 +652,7 @@ function renderMonthGrid() {
     p.addEventListener("click", (e) => {
       e.stopPropagation();
       renderDaySlots();
+      scrollToSlotsMobile();
     });
   });
 }
@@ -589,6 +738,42 @@ function renderDaySlots() {
       await bookSlot(slotId, btn);
     });
   });
+}
+
+
+function isMobileViewport() {
+  return window.matchMedia("(max-width: 820px)").matches;
+}
+
+function scrollToSlotsMobile() {
+  if (!isMobileViewport()) return;
+
+  const slotsTitle = document.getElementById("slotsTitle");
+  const fab = document.getElementById("mobileBackToCalendar");
+
+  if (slotsTitle) {
+    slotsTitle.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  if (fab) {
+    fab.hidden = false;
+  }
+}
+
+function scrollToCalendarMobile() {
+  const calendarCard = document.querySelector(".calendar-wrap > section.card:first-child");
+  if (calendarCard) {
+    calendarCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function scrollToFiltersMobile() {
+  const filtersCard = document.getElementById("filtersCard");
+  if (filtersCard) {
+    filtersCard.classList.add("is-open");
+    syncFiltersUI();
+    filtersCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 /* =======================
@@ -980,22 +1165,27 @@ function bindReservarNav() {
 function bindFiltersMobile() {
   const btnOpen = document.getElementById("btnFiltersToggle");
   const btnClose = document.getElementById("btnCloseFilters");
-  const btnApply = document.getElementById("btnApplyFilters");
   const card = document.getElementById("filtersCard");
+  const fab = document.getElementById("mobileBackToCalendar");
 
   if (!card) return;
 
   btnOpen?.addEventListener("click", () => {
     card.classList.add("is-open");
+    syncFiltersUI();
+    scrollToFiltersMobile();
   });
 
   btnClose?.addEventListener("click", () => {
     card.classList.remove("is-open");
+    syncFiltersUI();
   });
 
-  btnApply?.addEventListener("click", () => {
-    card.classList.remove("is-open");
+  fab?.addEventListener("click", () => {
+    scrollToCalendarMobile();
   });
+
+  syncFiltersUI();
 }
 
 /* =======================

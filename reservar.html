@@ -83,22 +83,48 @@
 <main class="content">
   <div class="container">
 
-    <button
-      class="filters-toggle"
-      id="btnFiltersToggle"
-      type="button"
-      aria-expanded="false"
-      aria-controls="filtersCard"
-    >
-      <i class="mdi mdi-filter-variant" aria-hidden="true"></i>
-      <span>Filtros</span>
-    </button>
+  <button
+  class="filters-toggle"
+  id="btnFiltersToggle"
+  type="button"
+  aria-expanded="true"
+  aria-controls="filtersCard"
+>
+  <i class="mdi mdi-tune-variant" aria-hidden="true"></i>
+  <span>Editar filtros</span>
+</button>
 
-    <section class="card filters-card" id="filtersCard">
+    <section class="card filters-card is-open" id="filtersCard" style="margin-top:12px;">
+      <div class="filters-step">
+        <div class="filters-step-main">
+          <span class="filters-step-badge">Paso 1</span>
+          <div class="filters-step-copy">
+            <h3>¿Qué querés reservar?</h3>
+            <p>Primero elegí la actividad. Después podés refinar por lugar o profesor y te mostramos solo los turnos disponibles para vos.</p>
+          </div>
+        </div>
+
+        <button
+          class="filters-collapse-btn"
+          id="btnCloseFilters"
+          type="button"
+          aria-expanded="true"
+          aria-controls="filtersBody"
+        >
+          Ocultar
+        </button>
+      </div>
+
+<div class="filters-summary" id="filtersSummary" hidden>
+  <div class="filters-summary-text" id="filtersSummaryText">
+    Actividad: Todas mis clases · Lugar: Todos · Profesor: Todos
+  </div>
+</div>
+
       <div class="filters-body" id="filtersBody">
         <div class="filters-grid">
           <div class="filters-left">
-            <div class="filters">
+            <div class="filters fields-prominent">
               <label class="field inline">
                 <span>Actividad</span>
                 <select id="filterActivity"></select>
@@ -110,29 +136,29 @@
               </label>
 
               <label class="field inline">
-                <span>Lugar/Sede</span>
+                <span>Lugar / Sede</span>
                 <select id="filterLocation"></select>
               </label>
             </div>
 
-            <p class="help">Solo se muestran turnos con cupos disponibles (y que no tengas ya reservados).</p>
+            <div class="filters-inline-help">
+              <p class="help">
+                Se muestran solamente turnos con cupo disponible y que todavía no tengas reservados.
+              </p>
+            </div>
           </div>
 
-          <aside class="filters-right" aria-label="Leyenda de actividades">
+          <aside class="filters-right" aria-label="Actividades disponibles">
+            <div class="filters-side-title">Tus actividades</div>
             <div id="activityLegend" class="activity-legend"></div>
           </aside>
         </div>
       </div>
-
-      <div class="filters-head">
-        <h3>Filtro</h3>
-
-        <div class="filters-mobile-actions">
-          <button class="btn-secondary btn-filter-close" id="btnCloseFilters" type="button">Cerrar</button>
-          <button class="btn-primary btn-filter-apply" id="btnApplyFilters" type="button">Aplicar filtros</button>
-        </div>
-      </div>
     </section>
+
+    <p class="calendar-intro">
+    Paso 2: elegí un día en el calendario para ver los horarios disponibles.
+    </p>
 
     <div class="grid-2 calendar-wrap" style="margin-top:16px;">
       <section class="card">
@@ -173,6 +199,16 @@
 
   </div>
 </main>
+
+<button
+  class="mobile-back-fab"
+  id="mobileBackToCalendar"
+  type="button"
+  hidden
+>
+  <i class="mdi mdi-arrow-up" aria-hidden="true"></i>
+  <span>Volver al calendario</span>
+</button>
 
 <div class="toasts" id="toasts"></div>
 
