@@ -362,6 +362,8 @@ function syncFiltersUI() {
 
   btnToggle.setAttribute("aria-expanded", String(isOpen));
   if (btnClose) btnClose.setAttribute("aria-expanded", String(isOpen));
+
+  updateFiltersFabVisibility();
 }
 
 /* =======================
@@ -551,26 +553,64 @@ function renderWeekGrid() {
   const monthGrid = $("#monthGrid");
   const dowGrid = $("#dowGrid");
 
-  if (weekGrid) weekGrid.style.display = "grid";
+  if (!weekGrid) return;
+
+  weekGrid.classList.remove("is-hidden");
+  weekGrid.classList.toggle("is-mobile-scroll", isMobileViewport());
+  weekGrid.style.display = isMobileViewport() ? "flex" : "grid";
+
   if (monthGrid) monthGrid.style.display = "none";
   if (dowGrid) dowGrid.style.display = "none";
 
-  if (!weekGrid) return;
   weekGrid.innerHTML = "";
 
   for (let i = 0; i < 7; i++) {
     const day = new Date(state.weekStart);
     day.setDate(day.getDate() + i);
 
-    const count = availableCountForDay(day);
+    const slots = slotsForDayAll(day);
+    const count = slots.length;
+
+    let countLabel = "Sin clases";
+    if (count === 1) countLabel = "1 clase";
+    if (count > 1) countLabel = `${count} clases`;
+
+    const uniqueActivities = [...new Set(slots.map(s => s.activity))];
+    const dotActivities = uniqueActivities.slice(0, 3);
+
+    let stateClass = "is-empty";
+    if (count === 1) stateClass = "has-one";
+    if (count > 1) stateClass = "has-many";
+
+    const dotsHtml = count > 0
+      ? `
+        <div class="day-dots">
+          ${dotActivities.map(activity => `
+            <span
+              class="day-dot-mini ${activityClass(activity)}"
+              title="${escAttr(activity)}"
+              aria-label="${escAttr(activity)}"
+            ></span>
+          `).join("")}
+        </div>
+      `
+      : `
+        <div class="day-dots">
+          <span class="day-dot-mini is-empty" aria-hidden="true"></span>
+        </div>
+      `;
 
     const cell = document.createElement("div");
-    cell.className = "day-cell" + (sameDay(day, state.selectedDate) ? " active" : "");
+    cell.className =
+      "day-cell " +
+      stateClass +
+      (sameDay(day, state.selectedDate) ? " active" : "");
+
     cell.innerHTML = `
       <div class="day-name">${esc(day.toLocaleDateString("es-AR", { weekday: "short" }))}</div>
       <div class="day-date">${esc(fmtDateShort(day))}</div>
-      <div class="day-meta">${count > 0 ? `${count} con cupos` : `Sin cupos`}</div>
-      ${count > 0 ? `<span class="badge ok">Disponible</span>` : `<span class="badge off">—</span>`}
+      <div class="day-meta ${count > 0 ? "ok" : "off"}">${esc(countLabel)}</div>
+      ${dotsHtml}
     `;
 
     cell.addEventListener("click", () => {
@@ -589,11 +629,17 @@ function renderMonthGrid() {
   const weekGrid = $("#weekGrid");
   const dowGrid = $("#dowGrid");
 
-  if (monthGrid) monthGrid.style.display = "grid";
-  if (weekGrid) weekGrid.style.display = "none";
-  if (dowGrid) dowGrid.style.display = "grid";
-
   if (!monthGrid) return;
+
+  monthGrid.style.display = "grid";
+
+  if (weekGrid) {
+    weekGrid.style.display = "none";
+    weekGrid.classList.remove("is-mobile-scroll");
+    weekGrid.classList.add("is-hidden");
+  }
+
+  if (dowGrid) dowGrid.style.display = "grid";
 
   monthGrid.innerHTML = "";
   renderDowHeader();
@@ -774,6 +820,64 @@ function scrollToFiltersMobile() {
     syncFiltersUI();
     filtersCard.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+}
+
+
+function updateFiltersFabVisibility() {
+  const fab = document.getElementById("filtersFab");
+  const filtersCard = document.getElementById("filtersCard");
+
+  if (!fab || !filtersCard) return;
+
+  const isMobile = window.matchMedia("(max-width: 820px)").matches;
+  const filtersOpen = filtersCard.classList.contains("is-open");
+
+  fab.hidden = !(isMobile && !filtersOpen);
+}
+
+function openFiltersFromFab() {
+  const filtersCard = document.getElementById("filtersCard");
+  if (!filtersCard) return;
+
+  filtersCard.classList.add("is-open");
+  syncFiltersUI();
+
+  filtersCard.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+function updateFiltersFabVisibility(){
+  const fab = document.getElementById("filtersFab");
+  const filtersCard = document.getElementById("filtersCard");
+
+  if(!fab || !filtersCard) return;
+
+  const isMobile = window.matchMedia("(max-width: 820px)").matches;
+  const filtersOpen = filtersCard.classList.contains("is-open");
+
+  if(isMobile && !filtersOpen){
+    fab.hidden = false;
+  } else {
+    fab.hidden = true;
+  }
+}
+
+function openFiltersFromFab(){
+  const filtersCard = document.getElementById("filtersCard");
+
+  if(!filtersCard) return;
+
+  filtersCard.classList.add("is-open");
+  syncFiltersUI();
+
+  filtersCard.scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
+
+  updateFiltersFabVisibility();
 }
 
 /* =======================
@@ -1165,8 +1269,9 @@ function bindReservarNav() {
 function bindFiltersMobile() {
   const btnOpen = document.getElementById("btnFiltersToggle");
   const btnClose = document.getElementById("btnCloseFilters");
+  const fabBack = document.getElementById("mobileBackToCalendar");
+  const fabFilters = document.getElementById("filtersFab");
   const card = document.getElementById("filtersCard");
-  const fab = document.getElementById("mobileBackToCalendar");
 
   if (!card) return;
 
@@ -1181,8 +1286,12 @@ function bindFiltersMobile() {
     syncFiltersUI();
   });
 
-  fab?.addEventListener("click", () => {
+  fabBack?.addEventListener("click", () => {
     scrollToCalendarMobile();
+  });
+
+  fabFilters?.addEventListener("click", () => {
+    openFiltersFromFab();
   });
 
   syncFiltersUI();
@@ -1823,3 +1932,7 @@ function bindProfileData() {
    ======================= */
 bindChangePassword();
 init();
+
+window.addEventListener("scroll", () => {
+  updateFiltersFabVisibility();
+});

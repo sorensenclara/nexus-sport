@@ -83,16 +83,16 @@
 <main class="content">
   <div class="container">
 
-  <button
-  class="filters-toggle"
-  id="btnFiltersToggle"
-  type="button"
-  aria-expanded="true"
-  aria-controls="filtersCard"
->
-  <i class="mdi mdi-tune-variant" aria-hidden="true"></i>
-  <span>Editar filtros</span>
-</button>
+        <button
+            class="filters-toggle"
+            id="btnFiltersToggle"
+            type="button"
+            aria-expanded="true"
+            aria-controls="filtersCard"
+          >
+            <i class="mdi mdi-tune-variant" aria-hidden="true"></i>
+            <span>Editar filtros</span>
+         </button>
 
     <section class="card filters-card is-open" id="filtersCard" style="margin-top:12px;">
       <div class="filters-step">
@@ -131,13 +131,13 @@
               </label>
 
               <label class="field inline">
-                <span>Profesor</span>
-                <select id="filterInstructor"></select>
+                <span>Lugar / Sede</span>
+                <select id="filterLocation"></select>
               </label>
 
               <label class="field inline">
-                <span>Lugar / Sede</span>
-                <select id="filterLocation"></select>
+                <span>Profesor</span>
+                <select id="filterInstructor"></select>
               </label>
             </div>
 
@@ -208,6 +208,16 @@
 >
   <i class="mdi mdi-arrow-up" aria-hidden="true"></i>
   <span>Volver al calendario</span>
+</button>
+
+<button
+  class="filters-fab"
+  id="filtersFab"
+  type="button"
+  aria-label="Editar filtros"
+  hidden
+>
+  <i class="mdi mdi-tune-variant"></i>
 </button>
 
 <div class="toasts" id="toasts"></div>
