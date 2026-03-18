@@ -92,11 +92,21 @@
 
 <main class="content">
   <div class="container">
-    <section class="card">
-      <h3>Turnos reservados</h3>
-      <div id="myTurnsList" class="turns"></div>
-      <div id="myTurnsEmpty" class="empty muted-dark" style="display:none;">Todavía no tenés turnos reservados.</div>
-    </section>
+      <section class="card">
+        <div class="my-turns-head">
+          <h2>Turnos reservados</h2>
+
+          <div class="my-turns-filter">
+            <label for="myTurnsActivityFilter">Actividad</label>
+            <select id="myTurnsActivityFilter">
+              <option value="ALL">Todas</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="myTurnsList" class="turns"></div>
+        <div id="myTurnsEmpty" class="empty muted-dark" style="display:none;">Todavía no tenés turnos reservados.</div>
+      </section>
   </div>
 </main>
 

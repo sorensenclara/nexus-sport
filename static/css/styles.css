@@ -1311,6 +1311,79 @@ p,
   justify-content:center;
 }
 
+
+.my-turns-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+
+.my-turns-head h2{
+  margin:0;
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:-0.2px;
+  color:var(--primary);
+}
+
+.filters-step-copy h2{
+  margin:0;
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:-0.2px;
+  color:var(--primary);
+}
+
+.dashboard-h2 {
+  margin:0;
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:-0.2px;
+  color:var(--primary);
+}
+
+.my-turns-head h3{
+  margin:0;
+}
+
+.my-turns-filter{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:220px;
+}
+
+.my-turns-filter label{
+  font-size:12px;
+  font-weight:800;
+  color:rgba(0,0,0,.55);
+}
+
+.my-turns-filter select{
+  min-height:42px;
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff;
+  color:var(--text);
+  border-radius:14px;
+  padding:10px 12px;
+  outline:none;
+  font-size:14px;
+}
+
+@media (max-width: 820px){
+  .my-turns-head{
+    align-items:stretch;
+  }
+
+  .my-turns-filter{
+    width:100%;
+    min-width:100%;
+  }
+}
+
 /* =========================
    Login / auth
    ========================= */
@@ -2357,10 +2430,20 @@ p,
 .filters-step{
   display:flex;
   align-items:flex-start;
+  justify-content:space-between;
   gap:16px;
-  margin-bottom:18px;
-  padding-bottom:16px;
-  border-bottom:1px solid rgba(15,23,42,.08);
+  margin-bottom:16px;
+}
+
+.filters-step-main{
+  flex:1 1 auto;
+  min-width:0;
+}
+
+.filters-collapse-btn{
+  flex:0 0 auto;
+  margin-top:0;
+  white-space:nowrap;
 }
 
 .filters-step-badge{
@@ -2373,7 +2456,7 @@ p,
   border-radius:999px;
   background: rgba(62,118,153,.14);
   color: var(--text);
-  font-size:12px;
+  font-size:26px;
   font-weight:900;
   letter-spacing:.3px;
   flex: 0 0 auto;
@@ -2453,6 +2536,24 @@ p,
   color: rgba(0,0,0,.68);
 }
 
+.reserve-step-card{
+  padding:18px;
+}
+
+.reserve-step-header{
+  margin-bottom:16px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--tc-border);
+}
+
+.reserve-step-card .calendar-wrap{
+  margin-top:0;
+}
+
+.reserve-step-card .calendar-wrap > .card{
+  margin-top:0;
+}
+
 /* Desktop: que el bloque respire mejor */
 @media (min-width: 821px){
   .filters-card{
@@ -2469,9 +2570,11 @@ p,
 
   .filters-step{
     flex-direction:column;
-    gap:10px;
-    margin-bottom:14px;
-    padding-bottom:14px;
+    align-items:flex-start;
+  }
+
+  .filters-collapse-btn{
+    align-self:flex-end;
   }
 
   .filters-step-badge{
@@ -2505,6 +2608,17 @@ p,
   .calendar-intro{
     font-size:13px;
     margin-top:12px;
+  }
+}
+
+@media (max-width: 820px){
+  .reserve-step-card{
+    padding:16px;
+  }
+
+  .reserve-step-header{
+    margin-bottom:14px;
+    padding-bottom:14px;
   }
 }
 
@@ -2791,16 +2905,28 @@ p,
 }
 
 .filters-collapse-btn{
-  border:1px solid rgba(15,23,42,.12);
-  background:#fff;
-  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:0 16px;
   border-radius:999px;
-  padding:10px 14px;
-  font-size:13px;
-  font-weight:800;
+
+  background:#fff;
+  color:var(--primary);
+
+  border:1.5px solid rgba(34,118,155,.35);
+
+  font-size:14px;
+  font-weight:700;
+
   cursor:pointer;
-  white-space:nowrap;
-  box-shadow:0 4px 12px rgba(15,23,42,.05);
+  transition:all .2s ease;
+}
+
+.filters-collapse-btn:hover{
+  background:rgba(34,118,155,.06);
+  border-color:var(--primary);
 }
 
 .filters-summary{

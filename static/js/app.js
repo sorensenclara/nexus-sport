@@ -26,7 +26,8 @@ let state = {
   weekStart: startOfWeek(new Date()),
   monthCursor: new Date(),
   view: "WEEK",
-  filters: { activity: "ALL", instructor: "", location: "" }
+  filters: { activity: "ALL", instructor: "", location: "" },
+  myTurnsFilter: { activity: "ALL" }
 };
 
 
@@ -371,6 +372,12 @@ function syncFiltersUI() {
 
   btnToggle.setAttribute("aria-expanded", String(isOpen));
   if (btnClose) btnClose.setAttribute("aria-expanded", String(isOpen));
+
+  const isMobile = window.matchMedia("(max-width: 820px)").matches;
+
+  if (btnToggle) {
+    btnToggle.style.display = (isMobile && isOpen) ? "none" : "";
+  }
 
   updateFiltersFabVisibility();
 }
@@ -1405,6 +1412,33 @@ async function cancelSeries(seriesKey) {
   });
 }
 
+function renderMyTurnsActivityFilter(groups) {
+  const select = document.getElementById("myTurnsActivityFilter");
+  if (!select) return;
+
+  const activities = unique(
+    groups.map(group => group.items[0]?.slot?.activity).filter(Boolean)
+  );
+
+  select.innerHTML = `
+    <option value="ALL">Todas</option>
+    ${activities.map(activity => `
+      <option value="${escAttr(activity)}">${esc(activity)}</option>
+    `).join("")}
+  `;
+
+  if (!activities.includes(state.myTurnsFilter.activity) && state.myTurnsFilter.activity !== "ALL") {
+    state.myTurnsFilter.activity = "ALL";
+  }
+
+  select.value = state.myTurnsFilter.activity;
+
+  select.onchange = () => {
+    state.myTurnsFilter.activity = select.value;
+    renderMisTurnos();
+  };
+}
+
 function renderMisTurnos() {
   const host =
     $("#myTurnsList") ||
@@ -1417,7 +1451,13 @@ function renderMisTurnos() {
     $("#myTurnsEmpty") ||
     $("#misTurnosEmpty");
 
-  const groups = groupReservationsBySeries();
+  const allGroups = groupReservationsBySeries();
+    renderMyTurnsActivityFilter(allGroups);
+
+    const groups = allGroups.filter(group => {
+      if (state.myTurnsFilter.activity === "ALL") return true;
+      return group.items[0]?.slot?.activity === state.myTurnsFilter.activity;
+    });
 
   if (!groups.length) {
     if (empty) empty.style.display = "";
@@ -2350,4 +2390,8 @@ init();
 
 window.addEventListener("scroll", () => {
   updateFiltersFabVisibility();
+});
+
+window.addEventListener("resize", () => {
+  syncFiltersUI();
 });

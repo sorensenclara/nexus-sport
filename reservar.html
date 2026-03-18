@@ -97,29 +97,23 @@
     <section class="card filters-card is-open" id="filtersCard" style="margin-top:12px;">
       <div class="filters-step">
         <div class="filters-step-main">
-          <span class="filters-step-badge">Paso 1</span>
+          <span class="filters-step-badge">#1</span>
           <div class="filters-step-copy">
-            <h3>¿Qué querés reservar?</h3>
+            <h2>¿Qué querés reservar?</h2>
             <p>Primero elegí la actividad. Después podés refinar por lugar o profesor y te mostramos solo los turnos disponibles para vos.</p>
           </div>
         </div>
 
-        <button
-          class="filters-collapse-btn"
-          id="btnCloseFilters"
-          type="button"
-          aria-expanded="true"
-          aria-controls="filtersBody"
-        >
-          Ocultar
+        <button class="filters-collapse-btn" id="btnCloseFilters" type="button" aria-expanded="true" aria-controls="filtersBody" >
+          Ocultar Filtros
         </button>
       </div>
 
-<div class="filters-summary" id="filtersSummary" hidden>
-  <div class="filters-summary-text" id="filtersSummaryText">
-    Actividad: Todas mis clases · Lugar: Todos · Profesor: Todos
-  </div>
-</div>
+      <div class="filters-summary" id="filtersSummary" hidden>
+        <div class="filters-summary-text" id="filtersSummaryText">
+          Actividad: Todas mis clases · Lugar: Todos · Profesor: Todos
+        </div>
+      </div>
 
       <div class="filters-body" id="filtersBody">
         <div class="filters-grid">
@@ -156,47 +150,55 @@
       </div>
     </section>
 
-    <p class="calendar-intro">
-    Paso 2: elegí un día en el calendario para ver los horarios disponibles.
-    </p>
 
-    <div class="grid-2 calendar-wrap" style="margin-top:16px;">
-      <section class="card">
-        <div class="calendar-head">
-          <button class="icon-btn" id="btnPrev" aria-label="Anterior" type="button">‹</button>
+    <section class="card reserve-step-card" style="margin-top:16px;">
+      <div class="filters-step reserve-step-header">
+        <div class="filters-step-main">
+          <span class="filters-step-badge">#2</span>
+          <div class="filters-step-copy">
+            <h2>¿Para cuándo querés reservar?</h2>
+            <p>Elegí un día en el calendario para ver los horarios disponibles.</p>
+          </div>
+        </div>
+      </div>
 
-          <div class="calendar-head-center">
-            <div class="calendar-head-top">
-              <div>
-                <div style="font-weight:900" id="calTitle">Semana</div>
-                <div class="muted-dark small" id="calSub">—</div>
-              </div>
+      <div class="grid-2 calendar-wrap" style="margin-top:16px;">
+        <section class="card">
+          <div class="calendar-head">
+            <button class="icon-btn" id="btnPrev" aria-label="Anterior" type="button">‹</button>
 
-              <div class="view-switch">
-                <button class="pill active" id="pillWeek" type="button">Semana</button>
-                <button class="pill" id="pillMonth" type="button">Mes</button>
+            <div class="calendar-head-center">
+              <div class="calendar-head-top">
+                <div>
+                  <div style="font-weight:900" id="calTitle">Semana</div>
+                  <div class="muted-dark small" id="calSub">—</div>
+                </div>
+
+                <div class="view-switch">
+                  <button class="pill active" id="pillWeek" type="button">Semana</button>
+                  <button class="pill" id="pillMonth" type="button">Mes</button>
+                </div>
               </div>
             </div>
+
+            <button class="icon-btn" id="btnNext" aria-label="Siguiente" type="button">›</button>
           </div>
 
-          <button class="icon-btn" id="btnNext" aria-label="Siguiente" type="button">›</button>
-        </div>
+          <div class="calendar-scroll">
+            <div class="dow-grid" id="dowGrid" style="display:none"></div>
+            <div class="week-grid" id="weekGrid"></div>
+            <div class="month-grid" id="monthGrid" style="display:none"></div>
+          </div>
+        </section>
 
-        <div class="calendar-scroll">
-          <div class="dow-grid" id="dowGrid" style="display:none"></div>
-          <div class="week-grid" id="weekGrid"></div>
-          <div class="month-grid" id="monthGrid" style="display:none"></div>
-        </div>
-      </section>
-
-      <section class="card">
-        <h3 id="slotsTitle">Turnos del día</h3>
-        <div class="muted-dark small" id="slotsHint">Seleccioná un día para ver los turnos.</div>
-        <div id="dayActivityChips" class="day-chips"></div>
-        <div id="slotsList" class="slots"></div>
-      </section>
-    </div>
-
+        <section class="card">
+          <h3 id="slotsTitle">Turnos del día</h3>
+          <div class="muted-dark small" id="slotsHint">Seleccioná un día para ver los turnos.</div>
+          <div id="dayActivityChips" class="day-chips"></div>
+          <div id="slotsList" class="slots"></div>
+        </section>
+      </div>
+    </section>
   </div>
 </main>
 
