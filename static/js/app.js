@@ -372,6 +372,7 @@ function syncFiltersUI() {
 
   btnToggle.setAttribute("aria-expanded", String(isOpen));
   if (btnClose) btnClose.setAttribute("aria-expanded", String(isOpen));
+  if (btnClose) btnClose.textContent = isOpen ? "Ocultar filtros" : "Mostrar filtros";
 
   const isMobile = window.matchMedia("(max-width: 820px)").matches;
 
@@ -1737,12 +1738,8 @@ function bindFiltersMobile() {
   });
 
   btnClose?.addEventListener("click", () => {
-    card.classList.remove("is-open");
+    card.classList.toggle("is-open");
     syncFiltersUI();
-  });
-
-  fabBack?.addEventListener("click", () => {
-    scrollToCalendarMobile();
   });
 
   fabFilters?.addEventListener("click", () => {
