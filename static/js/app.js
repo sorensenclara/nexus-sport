@@ -39,37 +39,46 @@ function seedIfEmpty() {
   if (existing && Array.isArray(existing) && existing.length) return;
 
   const today = startOfDay(new Date());
+  const start = startOfWeek(today);
   const sessions = [];
-  const activities = [
-    { a: "Padel", i: ["Profe Juan", "Profe Nico"], l: ["Cancha 1", "Cancha 2"], cap: 8 },
-    { a: "Pilates", i: ["Laura Pérez"], l: ["Sala A"], cap: 14 },
-    { a: "Gym", i: ["Matías Sosa"], l: ["Gimnasio"], cap: 30 },
-    { a: "Crossfit", i: ["Profe Vero"], l: ["Box"], cap: 16 }
+
+  const weeklyTemplate = [
+    { day: 1, hour: 18, activity: "Gym", instructor: "Matías Sosa", location: "Gimnasio", capacity: 30 },
+    { day: 1, hour: 19, activity: "Crossfit", instructor: "Profe Vero", location: "Box", capacity: 16 },
+
+    { day: 2, hour: 18, activity: "Pilates", instructor: "Laura Pérez", location: "Sala A", capacity: 14 },
+    { day: 2, hour: 19, activity: "Gym", instructor: "Matías Sosa", location: "Gimnasio", capacity: 30 },
+
+    { day: 3, hour: 18, activity: "Padel", instructor: "Profe Juan", location: "Cancha 1", capacity: 8 },
+    { day: 3, hour: 19, activity: "Crossfit", instructor: "Profe Vero", location: "Box", capacity: 16 },
+
+    { day: 4, hour: 18, activity: "Pilates", instructor: "Laura Pérez", location: "Sala A", capacity: 14 },
+    { day: 4, hour: 19, activity: "Gym", instructor: "Matías Sosa", location: "Gimnasio", capacity: 30 },
+
+    { day: 5, hour: 18, activity: "Gym", instructor: "Matías Sosa", location: "Gimnasio", capacity: 30 },
+    { day: 5, hour: 19, activity: "Padel", instructor: "Profe Nico", location: "Cancha 2", capacity: 8 },
+
+    { day: 6, hour: 10, activity: "Crossfit", instructor: "Profe Vero", location: "Box", capacity: 16 }
   ];
 
-  for (let d = -7; d <= 28; d++) {
-    const day = new Date(today);
-    day.setDate(today.getDate() + d);
+  for (let week = -1; week < 6; week++) {
+    weeklyTemplate.forEach((item, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + (week * 7) + item.day);
+      date.setHours(item.hour, 0, 0, 0);
 
-    const count = (day.getDay() === 0) ? 0 : (day.getDay() % 3);
-    for (let k = 0; k < count; k++) {
-      const act = activities[(day.getDate() + k) % activities.length];
-      const start = new Date(day);
-      start.setHours(18 + k, 0, 0, 0);
-
-      const id = cryptoId();
-      const booked = Math.max(0, Math.min(act.cap - 1, ((day.getDate() + k * 3) % 6)));
+      const bookedBase = (week + index) % Math.max(2, Math.min(item.capacity - 1, 6));
 
       sessions.push({
-        id,
-        activity: act.a,
-        instructor: act.i[(day.getDate() + k) % act.i.length],
-        location: act.l[(day.getDate() + k) % act.l.length],
-        capacity: act.cap,
-        booked,
-        startISO: start.toISOString()
+        id: cryptoId(),
+        activity: item.activity,
+        instructor: item.instructor,
+        location: item.location,
+        capacity: item.capacity,
+        booked: bookedBase,
+        startISO: date.toISOString()
       });
-    }
+    });
   }
 
   saveJSON(LS.sessions, sessions);
@@ -778,12 +787,12 @@ function renderDaySlots() {
     </div>
   `).join("");
 
-  list.querySelectorAll('button[data-slot]').forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const slotId = btn.getAttribute("data-slot");
-      await bookSlot(slotId, btn);
+    list.querySelectorAll('button[data-slot]').forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const slotId = btn.getAttribute("data-slot");
+        await askReserveMode(slotId, btn);
+      });
     });
-  });
 }
 
 
@@ -822,6 +831,25 @@ function scrollToFiltersMobile() {
   }
 }
 
+function formatSlotSummary(slot) {
+  if (!slot) return "";
+
+  const date = new Date(slot.startISO);
+  const dayLabel = date.toLocaleDateString("es-AR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
+  });
+
+  const timeLabel = fmtTime(date);
+
+  return `${slot.activity} · ${capitalize(dayLabel)} · ${timeLabel}<br>Profe ${slot.instructor} · ${slot.location}`;
+}
+
+function capitalize(text) {
+  if (!text) return "";
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
 
 function updateFiltersFabVisibility() {
   const fab = document.getElementById("filtersFab");
@@ -883,35 +911,61 @@ function openFiltersFromFab(){
 /* =======================
    Booking
    ======================= */
-async function bookSlot(slotId, btnEl) {
-  btnEl.disabled = true;
-  btnEl.textContent = "Anotando...";
-  await sleep(700);
+function buildSeriesKey(slot) {
+  const date = new Date(slot.startISO);
+  const day = date.getDay();
+  const hour = date.getHours();
+  const minutes = date.getMinutes();
+
+  return `${slot.activity}|${slot.instructor}|${slot.location}|${day}|${hour}:${minutes}`;
+}
+
+async function bookSlot(slotId, btnEl = null, options = {}) {
+  const { silent = false, skipRender = false } = options;
+
+  if (btnEl) {
+    btnEl.disabled = true;
+    btnEl.textContent = "Anotando...";
+  }
+
+  await sleep(500);
 
   const sessions = getClubSessions();
   const slot = sessions.find(s => s.id === slotId);
 
   if (!slot) {
-    toast("bad", "Error", "No se encontró el turno.");
-    btnEl.disabled = false;
-    btnEl.textContent = "Anotarme";
-    return;
+    if (!silent) {
+      toast("bad", "Error", "No se encontró el turno.");
+    }
+    if (btnEl) {
+      btnEl.disabled = false;
+      btnEl.textContent = "Anotarme";
+    }
+    return { ok: false, reason: "not_found" };
   }
 
   const available = slot.capacity - slot.booked;
   if (available <= 0) {
-    toast("bad", "Sin cupos", "Este turno ya no tiene cupos.");
-    btnEl.disabled = false;
-    btnEl.textContent = "Anotarme";
-    return;
+    if (!silent) {
+      toast("bad", "Sin cupos", "Este turno ya no tiene cupos.");
+    }
+    if (btnEl) {
+      btnEl.disabled = false;
+      btnEl.textContent = "Anotarme";
+    }
+    return { ok: false, reason: "no_capacity", slot };
   }
 
   const myIds = getMySlotIds();
   if (myIds.has(slotId)) {
-    toast("bad", "Ya estás anotado/a", "Este turno ya está en tus turnos.");
-    btnEl.disabled = false;
-    btnEl.textContent = "Anotarme";
-    return;
+    if (!silent) {
+      toast("bad", "Ya estás anotado/a", "Este turno ya está en tus turnos.");
+    }
+    if (btnEl) {
+      btnEl.disabled = false;
+      btnEl.textContent = "Anotarme";
+    }
+    return { ok: false, reason: "already_booked", slot };
   }
 
   const res = getReservations();
@@ -919,6 +973,7 @@ async function bookSlot(slotId, btnEl) {
     id: cryptoId(),
     username: state.user.username,
     slotId,
+    seriesKey: buildSeriesKey(slot),
     createdISO: new Date().toISOString()
   });
   saveReservations(res);
@@ -926,17 +981,209 @@ async function bookSlot(slotId, btnEl) {
   slot.booked += 1;
   saveJSON(LS.sessions, sessions);
 
-  showAlert(
-    "ok",
-    "Listo",
-    `Quedaste anotado/a en ${slot.activity} · ${fmtDateShort(new Date(slot.startISO))} ${fmtTime(new Date(slot.startISO))}`
-  );
+  if (!silent) {
+    showAlert(
+      "ok",
+      "Listo",
+      `Quedaste anotado/a en ${slot.activity} · ${fmtDateShort(new Date(slot.startISO))} ${fmtTime(new Date(slot.startISO))}`
+    );
+  }
 
-  btnEl.disabled = false;
-  btnEl.textContent = "Anotarme";
+  if (btnEl) {
+    btnEl.disabled = false;
+    btnEl.textContent = "Anotarme";
+  }
+
+  if (!skipRender) {
+    renderCalendar();
+    renderDaySlots();
+  }
+
+  return { ok: true, reason: "booked", slot };
+}
+
+function getEndOfMonth(date) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+}
+
+function sameRecurringPattern(baseSlot, candidateSlot) {
+  const baseDate = new Date(baseSlot.startISO);
+  const candidateDate = new Date(candidateSlot.startISO);
+
+  return (
+    candidateSlot.activity === baseSlot.activity &&
+    candidateSlot.instructor === baseSlot.instructor &&
+    candidateSlot.location === baseSlot.location &&
+    candidateDate.getDay() === baseDate.getDay() &&
+    fmtTime(candidateDate) === fmtTime(baseDate)
+  );
+}
+
+function getRecurringSlotsUntilMonthEnd(baseSlotId) {
+  const sessions = getClubSessions();
+  const baseSlot = sessions.find(s => s.id === baseSlotId);
+  if (!baseSlot) return [];
+
+  const baseDate = new Date(baseSlot.startISO);
+  const monthEnd = getEndOfMonth(baseDate);
+
+  return sessions
+    .filter(slot => {
+      const slotDate = new Date(slot.startISO);
+      return (
+        slotDate >= baseDate &&
+        slotDate <= monthEnd &&
+        sameRecurringPattern(baseSlot, slot)
+      );
+    })
+    .sort((a, b) => new Date(a.startISO) - new Date(b.startISO));
+}
+
+async function bookRecurringUntilMonthEnd(baseSlotId) {
+  const recurringSlots = getRecurringSlotsUntilMonthEnd(baseSlotId);
+
+  let bookedCount = 0;
+  let noCapacityCount = 0;
+  let alreadyBookedCount = 0;
+  let notFoundCount = 0;
+
+  for (const slot of recurringSlots) {
+    const result = await bookSlot(slot.id, null, {
+      silent: true,
+      skipRender: true
+    });
+
+    if (result.ok) bookedCount += 1;
+    else if (result.reason === "no_capacity") noCapacityCount += 1;
+    else if (result.reason === "already_booked") alreadyBookedCount += 1;
+    else if (result.reason === "not_found") notFoundCount += 1;
+  }
 
   renderCalendar();
   renderDaySlots();
+
+  return {
+    total: recurringSlots.length,
+    bookedCount,
+    noCapacityCount,
+    alreadyBookedCount,
+    notFoundCount
+  };
+}
+
+async function askReserveMode(slotId, btnEl = null) {
+  const sessions = getClubSessions();
+  const slot = sessions.find(s => s.id === slotId);
+
+  if (!slot) {
+    toast("bad", "Error", "No se encontró el turno.");
+    return;
+  }
+
+  const slotDate = new Date(slot.startISO);
+  const endOfMonth = getEndOfMonth(slotDate);
+  const endLabel = endOfMonth.toLocaleDateString("es-AR", {
+    day: "numeric",
+    month: "long"
+  });
+
+  if (typeof Swal === "undefined") {
+    await bookSlot(slotId, btnEl);
+    return;
+  }
+
+  const primary = getComputedStyle(document.documentElement)
+    .getPropertyValue("--primary")
+    .trim() || "#22769B";
+
+  const secondary = getComputedStyle(document.documentElement)
+    .getPropertyValue("--secondary")
+    .trim() || "#94a3b8";
+
+  const result = await Swal.fire({
+    title: "¿Cómo querés reservar?",
+    html: `
+      <div class="swal-reserve-body">
+        <div class="swal-reserve-slot">
+          <div class="swal-reserve-slot-title">
+            ${esc(slot.activity)} · ${esc(fmtDateShort(slotDate))} · ${esc(fmtTime(slotDate))}
+          </div>
+          <div class="swal-reserve-slot-meta">
+            Profe ${esc(slot.instructor)} · ${esc(slot.location)}
+          </div>
+        </div>
+
+        <label class="swal-reserve-option">
+          <input type="radio" name="swalReserveMode" value="single" checked>
+          <span class="swal-reserve-option-copy">
+            <strong>Solo esta clase</strong>
+            <span>Reserva únicamente este turno.</span>
+          </span>
+        </label>
+
+        <label class="swal-reserve-option">
+          <input type="radio" name="swalReserveMode" value="monthly">
+          <span class="swal-reserve-option-copy">
+            <strong>Todas las semanas hasta fin de mes</strong>
+            <span>Intentaremos reservar las próximas clases de este mismo horario hasta el ${esc(endLabel)}.</span>
+          </span>
+        </label>
+      </div>
+    `,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Confirmar reserva",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: primary,
+    cancelButtonColor: secondary,
+    reverseButtons: true,
+    iconColor: primary,
+    buttonsStyling: false,
+    background: "#ffffff",
+    color: "#0f172a",
+    customClass: {
+      popup: "swal-popup-custom swal-popup-reserve",
+      confirmButton: "swal-btn-primary",
+      cancelButton: "swal-btn-secondary"
+    },
+    preConfirm: () => {
+      const selected = document.querySelector('input[name="swalReserveMode"]:checked');
+      return selected ? selected.value : "single";
+    }
+  });
+
+  if (!result.isConfirmed) return;
+
+  if (result.value === "single") {
+    await bookSlot(slotId, btnEl);
+    return;
+  }
+
+  const recurringResult = await bookRecurringUntilMonthEnd(slotId);
+
+  const parts = [];
+  if (recurringResult.bookedCount > 0) {
+    parts.push(`Se reservaron ${recurringResult.bookedCount} clase${recurringResult.bookedCount === 1 ? "" : "s"}.`);
+  }
+  if (recurringResult.noCapacityCount > 0) {
+    parts.push(`${recurringResult.noCapacityCount} sin cupo.`);
+  }
+  if (recurringResult.alreadyBookedCount > 0) {
+    parts.push(`${recurringResult.alreadyBookedCount} ya las tenías reservadas.`);
+  }
+  if (recurringResult.notFoundCount > 0) {
+    parts.push(`${recurringResult.notFoundCount} no se pudieron procesar.`);
+  }
+
+  const message = parts.length
+    ? parts.join(" ")
+    : "No se encontraron clases para reservar hasta fin de mes.";
+
+  showAlert(
+    recurringResult.bookedCount > 0 ? "ok" : "bad",
+    recurringResult.bookedCount > 0 ? "Reserva actualizada" : "No se pudo completar",
+    message
+  );
 }
 
 function toast(kind, title, msg) {
@@ -1058,6 +1305,106 @@ async function cancelReservation(resId) {
   }
 }
 
+function getSlotSeriesLabel(slot) {
+  const d = new Date(slot.startISO);
+  const dayName = d.toLocaleDateString("es-AR", { weekday: "long" });
+  const time = fmtTime(d);
+  return `${slot.activity} · ${capitalize(dayName)} ${time}`;
+}
+
+function groupReservationsBySeries() {
+  const sessions = getClubSessions();
+  const my = getMyReservations();
+  const groupsMap = new Map();
+
+  my.forEach(r => {
+    const slot = sessions.find(s => s.id === r.slotId);
+    if (!slot) return;
+
+    const key = r.seriesKey || `single|${r.slotId}`;
+
+    if (!groupsMap.has(key)) {
+      groupsMap.set(key, {
+        key,
+        slot,
+        items: []
+      });
+    }
+
+    groupsMap.get(key).items.push({ r, slot });
+  });
+
+  return Array.from(groupsMap.values())
+    .map(group => {
+      group.items.sort((a, b) => new Date(a.slot.startISO) - new Date(b.slot.startISO));
+      return group;
+    })
+    .sort((a, b) => new Date(a.items[0].slot.startISO) - new Date(b.items[0].slot.startISO));
+}
+
+async function cancelSeries(seriesKey) {
+  const primary = getComputedStyle(document.documentElement)
+    .getPropertyValue("--primary")
+    .trim() || "#22769B";
+
+  const secondary = getComputedStyle(document.documentElement)
+    .getPropertyValue("--secondary")
+    .trim() || "#94a3b8";
+
+  const all = getReservations();
+  const mine = all.filter(r => r.username === state.user.username && r.seriesKey === seriesKey);
+
+  if (!mine.length) return;
+
+  if (typeof Swal === "undefined") {
+    const ok = window.confirm("¿Querés dar de baja toda la serie?");
+    if (!ok) return;
+  } else {
+    const result = await Swal.fire({
+      title: "Cancelar serie",
+      text: `¿Querés dar de baja ${mine.length} clase${mine.length === 1 ? "" : "s"} de esta serie?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Cancelar serie",
+      cancelButtonText: "Mantener clases",
+      confirmButtonColor: primary,
+      cancelButtonColor: secondary,
+      reverseButtons: true,
+      iconColor: "#EC5B29",
+      customClass: {
+        confirmButton: "swal-btn-primary",
+        cancelButton: "swal-btn-secondary"
+      },
+      buttonsStyling: false
+    });
+
+    if (!result.isConfirmed) return;
+  }
+
+  const remaining = all.filter(r => !(r.username === state.user.username && r.seriesKey === seriesKey));
+  saveReservations(remaining);
+
+  const sessions = getClubSessions();
+  mine.forEach(item => {
+    const slot = sessions.find(s => s.id === item.slotId);
+    if (slot) {
+      slot.booked = Math.max(0, (slot.booked || 0) - 1);
+    }
+  });
+  saveJSON(LS.sessions, sessions);
+
+  Swal.fire({
+    toast: true,
+    position: "top-end",
+    icon: "success",
+    title: "Serie cancelada correctamente",
+    showConfirmButton: false,
+    timer: 1800,
+    timerProgressBar: true,
+    iconColor: primary
+  });
+}
+
 function renderMisTurnos() {
   const host =
     $("#myTurnsList") ||
@@ -1070,37 +1417,105 @@ function renderMisTurnos() {
     $("#myTurnsEmpty") ||
     $("#misTurnosEmpty");
 
-  const items = myBookedItemsSorted();
+  const groups = groupReservationsBySeries();
 
-  if (!items.length) {
+  if (!groups.length) {
     if (empty) empty.style.display = "";
     host.innerHTML = "";
     return;
   }
+
   if (empty) empty.style.display = "none";
 
-  host.innerHTML = items.map(x => {
-    const d = new Date(x.slot.startISO);
+  host.innerHTML = groups.map((group, index) => {
+    const firstSlot = group.items[0].slot;
+    const label = getSlotSeriesLabel(firstSlot);
+    const count = group.items.length;
+    const detailId = `series-detail-${index}`;
+
+    const badgeText = count > 1 ? "Semanal recurrente" : "Clase única";
+    const badgeClass = count > 1 ? "is-recurring" : "is-single";
+
     return `
-      <div class="card turn-card">
-        <div class="turn-main">
-          <div class="turn-title">${esc(x.slot.activity)} · ${esc(fmtTime(d))}</div>
-          <div class="turn-meta">${esc(fmtDateLong(d))}</div>
-          <div class="turn-meta">${esc(x.slot.instructor)} · ${esc(x.slot.location)}</div>
+      <div class="card turn-card series-card">
+        <div class="series-head">
+          <div class="series-copy">
+            <div class="series-badge ${badgeClass}">${badgeText}</div>
+            <div class="turn-title">${esc(label)}</div>
+            <div class="turn-meta">${count} clase${count === 1 ? "" : "s"} reservada${count === 1 ? "" : "s"}</div>
+            <div class="turn-meta">${esc(firstSlot.instructor)} · ${esc(firstSlot.location)}</div>
+          </div>
+
+          <div class="series-actions">
+            ${count > 1 ? `
+              <button class="btn btn-warn btn-sm" type="button" data-cancel-series="${escAttr(group.key)}">
+                Cancelar serie
+              </button>
+
+              <button class="btn btn-secondary btn-sm" type="button" data-toggle-series="${escAttr(detailId)}">
+                Ver detalle
+              </button>
+            ` : `
+              <button class="btn btn-warn btn-sm" type="button" data-cancel="${escAttr(group.items[0].r.id)}">
+                Darme de baja
+              </button>
+            `}
+          </div>
         </div>
-        <div class="turn-actions">
-          <button class="btn btn-warn btn-cancel" data-cancel="${escAttr(x.r.id)}">
-            <i class="mdi mdi-trash-can-outline" aria-hidden="true"></i>
-            <span class="btn-label">Darme de baja</span>
-          </button>
+
+        <div id="${escAttr(detailId)}" class="series-detail-panel" hidden>
+          <div class="series-detail-list">
+            ${group.items.map(item => {
+              const d = new Date(item.slot.startISO);
+              return `
+                <div class="series-row">
+                  <div class="series-row-copy">
+                    <div class="series-row-title">${esc(fmtDateLong(d))}</div>
+                    <div class="series-row-time">${esc(fmtTime(d))}</div>
+                  </div>
+
+                  <div class="series-row-actions">
+                    <button class="btn btn-sm btn-warn" data-cancel="${escAttr(item.r.id)}">
+                      Darme de baja
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
         </div>
       </div>
     `;
   }).join("");
 
-  host.querySelectorAll("button[data-cancel]").forEach(btn => {
+  host.querySelectorAll("[data-toggle-series]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const detail = document.getElementById(btn.getAttribute("data-toggle-series"));
+      if (!detail) return;
+
+      const isHidden = detail.hasAttribute("hidden");
+
+      if (isHidden) {
+        detail.removeAttribute("hidden");
+        btn.textContent = "Ocultar detalle";
+      } else {
+        detail.setAttribute("hidden", "");
+        btn.textContent = "Ver detalle";
+      }
+    });
+  });
+
+  host.querySelectorAll("[data-cancel]").forEach(btn => {
     btn.addEventListener("click", async () => {
       await cancelReservation(btn.getAttribute("data-cancel"));
+      renderMisTurnos();
+      renderDashboard();
+    });
+  });
+
+  host.querySelectorAll("[data-cancel-series]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      await cancelSeries(btn.getAttribute("data-cancel-series"));
       renderMisTurnos();
       renderDashboard();
     });
@@ -1351,7 +1766,7 @@ function init() {
     renderCalendar();
     renderDaySlots();
     return;
-  }
+  } 
 
   if (page === "mis-turnos") {
     renderMisTurnos();
